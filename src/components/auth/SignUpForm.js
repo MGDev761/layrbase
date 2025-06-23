@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
+import logo from '../../assets/logopurple.png';
 
 const SignUpForm = ({ onSwitchToLogin }) => {
   const [firstName, setFirstName] = useState('');
@@ -12,6 +14,7 @@ const SignUpForm = ({ onSwitchToLogin }) => {
   const [success, setSuccess] = useState(false);
   
   const { signUp } = useAuth();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -42,6 +45,7 @@ const SignUpForm = ({ onSwitchToLogin }) => {
         setError(error.message);
       } else {
         setSuccess(true);
+        navigate('/dashboard');
       }
     } catch (err) {
       setError('An unexpected error occurred');
@@ -52,7 +56,7 @@ const SignUpForm = ({ onSwitchToLogin }) => {
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full space-y-8">
           <div className="text-center">
             <h2 className="text-3xl font-extrabold text-gray-900">
@@ -74,8 +78,11 @@ const SignUpForm = ({ onSwitchToLogin }) => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
+        <div className="flex justify-center mb-4">
+          <img src={logo} alt="LayrBase Logo" className="h-12 w-auto" />
+        </div>
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
             Create your account

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import logo from '../../assets/logopurple.png';
 
 const LoginForm = ({ onSwitchToSignUp }) => {
   const [email, setEmail] = useState('');
@@ -27,6 +28,8 @@ const LoginForm = ({ onSwitchToSignUp }) => {
       const { error } = await signIn({ email, password });
       if (error) {
         setError(error.message);
+      } else {
+        navigate('/dashboard');
       }
     } catch (err) {
       setError('An unexpected error occurred');
@@ -36,8 +39,11 @@ const LoginForm = ({ onSwitchToSignUp }) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
+        <div className="flex justify-center mb-4">
+          <img src={logo} alt="LayrBase Logo" className="h-12 w-auto" />
+        </div>
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
             Sign in to your account
