@@ -55,7 +55,7 @@ const TopNav = ({ onTabChange, onCreateOrganization, onJoinOrganization }) => {
                 Feedback
               </Popover.Button>
 
-              <Popover.Panel className="absolute left-1/2 -translate-x-1/2 z-10 mt-2 w-96 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+              <Popover.Panel className="absolute right-0 z-10 mt-2 w-96 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                 <div className="p-4">
                   <form onSubmit={handleSubmit}>
                     <div className="mb-4">
