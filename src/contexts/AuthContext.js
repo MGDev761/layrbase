@@ -125,6 +125,26 @@ export const AuthProvider = ({ children }) => {
       });
 
       if (error) throw error;
+      
+      // Immediately set user and fetch profile/organizations
+      if (data.user) {
+        setUser(data.user);
+        
+        try {
+          const profile = await getUserProfile(data.user.id);
+          setUserProfile(profile);
+          
+          const userOrgs = await getUserOrganizations();
+          setOrganizations(userOrgs);
+          
+          if (userOrgs && userOrgs.length > 0) {
+            setCurrentOrganization(userOrgs[0]);
+          }
+        } catch (profileError) {
+          console.error('Error fetching user data after sign in:', profileError);
+        }
+      }
+      
       return { data, error: null };
     } catch (error) {
       return { data: null, error };
