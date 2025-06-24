@@ -25,6 +25,7 @@ const RoundHistory = ({ onAddRound }) => {
     deleteTransaction,
     addRound,
     addShareClass,
+    addShareholder,
     loading,
     error,
   } = useCapTable();
@@ -32,6 +33,7 @@ const RoundHistory = ({ onAddRound }) => {
   const [expandedRounds, setExpandedRounds] = useState(new Set());
   const [showAddForm, setShowAddForm] = useState(false);
   const [showNewShareClassForm, setShowNewShareClassForm] = useState(false);
+  const [showNewShareholderForm, setShowNewShareholderForm] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     date: new Date().toISOString().split('T')[0],
@@ -65,6 +67,16 @@ const RoundHistory = ({ onAddRound }) => {
     } catch (err) {
       console.error('Error adding new share class:', err);
       alert(`Failed to add share class: ${err.message}`);
+    }
+  };
+
+  const handleAddNewShareholder = async (shareholderData) => {
+    try {
+      await addShareholder(shareholderData);
+      setShowNewShareholderForm(false);
+    } catch (err) {
+      console.error('Error adding new shareholder:', err);
+      alert(`Failed to add shareholder: ${err.message}`);
     }
   };
 
@@ -224,13 +236,20 @@ const RoundHistory = ({ onAddRound }) => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Shareholder</label>
                 <select
                   value={newParticipant.shareholder_id}
-                  onChange={(e) => setNewParticipant({ ...newParticipant, shareholder_id: e.target.value })}
+                  onChange={(e) => {
+                    if (e.target.value === 'new') {
+                      setShowNewShareholderForm(true);
+                    } else {
+                      setNewParticipant({ ...newParticipant, shareholder_id: e.target.value });
+                    }
+                  }}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md"
                 >
                   <option value="">Select Shareholder</option>
                   {shareholders.map(shareholder => (
                     <option key={shareholder.id} value={shareholder.id}>{shareholder.name}</option>
                   ))}
+                  <option value="new" className="font-semibold text-purple-600 bg-purple-50">+ Add New Shareholder</option>
                 </select>
               </div>
               <div>
@@ -331,11 +350,81 @@ const RoundHistory = ({ onAddRound }) => {
 
   return (
     <div className="space-y-6">
+      {/* Page Header */}
+      <div className="border-b border-gray-200 pb-4">
+        <h1 className="text-2xl font-bold text-gray-900">Round History</h1>
+        <p className="text-sm text-gray-600 mt-1">Track and manage your funding rounds, valuations, and investment details</p>
+      </div>
+
       <Modal isOpen={showNewShareClassForm} onClose={() => setShowNewShareClassForm(false)}>
         <AddShareClassForm
           onAdd={handleAddNewShareClass}
           onCancel={() => setShowNewShareClassForm(false)}
         />
+      </Modal>
+
+      <Modal isOpen={showNewShareholderForm} onClose={() => setShowNewShareholderForm(false)}>
+        <div className="bg-white rounded-lg p-6 w-96 max-w-md">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Add New Shareholder</h3>
+          <form onSubmit={(e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            handleAddNewShareholder({
+              name: formData.get('name'),
+              role: formData.get('role'),
+              email: formData.get('email')
+            });
+          }} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+              <input
+                type="text"
+                name="name"
+                required
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                placeholder="Enter shareholder name"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
+              <select
+                name="role"
+                required
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              >
+                <option value="">Select Role</option>
+                <option value="Founder">Founder</option>
+                <option value="Investor">Investor</option>
+                <option value="Employee">Employee</option>
+                <option value="Advisor">Advisor</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+              <input
+                type="email"
+                name="email"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                placeholder="Enter email address"
+              />
+            </div>
+            <div className="flex justify-end space-x-3 pt-4">
+              <button
+                type="button"
+                onClick={() => setShowNewShareholderForm(false)}
+                className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700"
+              >
+                Add Shareholder
+              </button>
+            </div>
+          </form>
+        </div>
       </Modal>
 
       {noRounds ? (

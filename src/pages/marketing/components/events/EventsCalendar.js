@@ -1,12 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../../../contexts/AuthContext';
 import { getMarketingEvents, createMarketingEvent, updateMarketingEvent, deleteMarketingEvent } from '../../../../services/marketingService';
+import dayjs from 'dayjs';
+
+const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+function getMonthMatrix(year, month) {
+  const firstDay = dayjs(`${year}-${month + 1}-01`);
+  const startDay = firstDay.startOf('week');
+  const endDay = firstDay.endOf('month').endOf('week');
+  const days = [];
+  let curr = startDay;
+  while (curr.isBefore(endDay) || curr.isSame(endDay, 'day')) {
+    days.push(curr);
+    curr = curr.add(1, 'day');
+  }
+  return days;
+}
 
 const EventsCalendar = () => {
   const { currentOrganization } = useAuth();
   const [view, setView] = useState('list');
   const [showAddModal, setShowAddModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedTypes, setSelectedTypes] = useState([]);
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -30,9 +47,40 @@ const EventsCalendar = () => {
     published: 'bg-green-100 text-green-800'
   };
 
+  const eventTypes = [
+    { value: 'meeting', label: 'Meeting' },
+    { value: 'launch', label: 'Launch' },
+    { value: 'campaign', label: 'Campaign' },
+    { value: 'blog', label: 'Blog' },
+    { value: 'other', label: 'Other' },
+  ];
+
+  const today = dayjs();
+  const [currentMonth, setCurrentMonth] = useState(today.month());
+  const [currentYear, setCurrentYear] = useState(today.year());
+
+  const monthStart = dayjs(`${currentYear}-${currentMonth + 1}-01`);
+  const monthMatrix = getMonthMatrix(currentYear, currentMonth);
+
   const filteredActivities = activities.filter(activity =>
     activity.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const filteredEvents = activities.filter(activity => {
+    const matchesType = selectedTypes.length === 0 || selectedTypes.includes(activity.event_type);
+    const matchesSearch =
+      !searchTerm ||
+      activity.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (activity.description && activity.description.toLowerCase().includes(searchTerm.toLowerCase()));
+    return matchesType && matchesSearch;
+  });
+
+  const eventsByDate = filteredEvents.reduce((acc, activity) => {
+    const date = dayjs(activity.event_date).format('YYYY-MM-DD');
+    if (!acc[date]) acc[date] = [];
+    acc[date].push(activity);
+    return acc;
+  }, {});
 
   useEffect(() => {
     if (currentOrganization?.organization_id) {
@@ -87,6 +135,23 @@ const EventsCalendar = () => {
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
+  const handlePrevMonth = () => {
+    if (currentMonth === 0) {
+      setCurrentMonth(11);
+      setCurrentYear(currentYear - 1);
+    } else {
+      setCurrentMonth(currentMonth - 1);
+    }
+  };
+  const handleNextMonth = () => {
+    if (currentMonth === 11) {
+      setCurrentMonth(0);
+      setCurrentYear(currentYear + 1);
+    } else {
+      setCurrentMonth(currentMonth + 1);
+    }
   };
 
   return (
@@ -226,9 +291,98 @@ const EventsCalendar = () => {
           )}
         </div>
       ) : (
-        <div className="bg-white shadow rounded-lg p-6">
-          <div className="text-center text-gray-500">
-            <p>Calendar view coming soon...</p>
+        <div className="flex w-full gap-6">
+          {/* Filter Panel */}
+          <div className="w-64 bg-white rounded-xl shadow border border-gray-100 p-4 h-fit self-start space-y-6">
+            <div>
+              <div className="text-xs font-bold text-gray-500 uppercase mb-2">Search</div>
+              <input
+                type="text"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                placeholder="Search events..."
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+              />
+            </div>
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+              <div className="text-xs font-bold text-gray-500 uppercase mb-4">Event Type</div>
+              <div className="space-y-3">
+                {eventTypes.map(type => (
+                  <label key={type.value} className="flex items-center gap-3 text-sm">
+                    <input
+                      type="checkbox"
+                      value={type.value}
+                      checked={selectedTypes.includes(type.value)}
+                      onChange={e => {
+                        if (e.target.checked) {
+                          setSelectedTypes([...selectedTypes, type.value]);
+                        } else {
+                          setSelectedTypes(selectedTypes.filter(t => t !== type.value));
+                        }
+                      }}
+                      className="w-5 h-5 accent-purple-600 rounded border-gray-300"
+                    />
+                    <span className="select-none">{type.label}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+            {/* Add more filters as needed */}
+          </div>
+          {/* Calendar */}
+          <div className="flex-1">
+            <div className="bg-white rounded-xl shadow border border-gray-100 p-6 w-full max-w-4xl mx-auto">
+              {/* Header */}
+              <div className="flex items-center justify-between mb-4">
+                <button onClick={handlePrevMonth} className="p-2 rounded hover:bg-gray-100">
+                  <span className="sr-only">Previous Month</span>
+                  <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                </button>
+                <h2 className="text-lg font-semibold text-gray-900">{monthStart.format('MMMM YYYY')}</h2>
+                <button onClick={handleNextMonth} className="p-2 rounded hover:bg-gray-100">
+                  <span className="sr-only">Next Month</span>
+                  <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                </button>
+              </div>
+              {/* Days of week */}
+              <div className="grid grid-cols-7 text-xs font-semibold text-gray-500 mb-2">
+                {daysOfWeek.map(day => (
+                  <div key={day} className="text-center py-1">{day}</div>
+                ))}
+              </div>
+              {/* Calendar grid */}
+              <div className="grid grid-cols-7 gap-px bg-gray-200 rounded-lg overflow-hidden">
+                {monthMatrix.map((date, idx) => {
+                  const isToday = date.isSame(today, 'day');
+                  const isCurrentMonth = date.month() === currentMonth;
+                  const dateStr = date.format('YYYY-MM-DD');
+                  const dayEvents = eventsByDate[dateStr] || [];
+                  return (
+                    <div
+                      key={dateStr + idx}
+                      className={`min-h-[80px] bg-white flex flex-col border border-gray-100 px-2 py-1 relative
+                        ${!isCurrentMonth ? 'bg-gray-50 text-gray-400' : ''}
+                        ${isToday ? 'border-2 border-purple-500' : ''}`}
+                    >
+                      <div className="flex items-center justify-between mb-1">
+                        <span className={`text-xs font-bold ${isToday ? 'text-purple-700' : ''}`}>{date.date()}</span>
+                        {isToday && <span className="text-[10px] bg-purple-100 text-purple-700 px-1 rounded">Today</span>}
+                      </div>
+                      <div className="flex-1 space-y-1">
+                        {dayEvents.slice(0,2).map((event, i) => (
+                          <div key={i} className="truncate text-xs bg-purple-50 text-purple-700 rounded px-1 py-0.5">
+                            {event.title}
+                          </div>
+                        ))}
+                        {dayEvents.length > 2 && (
+                          <div className="text-[10px] text-purple-500">+{dayEvents.length - 2} more</div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         </div>
       )}

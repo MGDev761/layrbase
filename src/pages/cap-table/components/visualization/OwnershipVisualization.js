@@ -2,14 +2,17 @@ import React from 'react';
 
 const OwnershipVisualization = () => {
   return (
-    <div>
-      <h2 className="text-lg font-medium text-gray-900 mb-4">Ownership Visualization</h2>
-      <div className="h-64 bg-white rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center">
-        <div className="text-center">
-          <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-          </svg>
-          <p className="mt-2 text-sm text-gray-500">Pie chart visualization will be displayed here</p>
+    <div className="space-y-6">
+      {/* Page Header */}
+      <div className="border-b border-gray-200 pb-4">
+        <h1 className="text-2xl font-bold text-gray-900">Ownership Visualization</h1>
+        <p className="text-sm text-gray-600 mt-1">Visual representation of your company's ownership structure</p>
+      </div>
+
+      <div className="bg-white rounded-lg shadow p-6">
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">Ownership Chart</h2>
+        <div className="text-center text-gray-500">
+          <p>Visualization component coming soon...</p>
         </div>
       </div>
     </div>

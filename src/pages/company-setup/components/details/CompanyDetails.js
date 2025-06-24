@@ -132,7 +132,7 @@ const CompanyDetails = () => {
       </div>
       {/* Action buttons */}
       <div className="mb-10" />
-      <div className="space-y-4">
+        <div className="space-y-4">
         {/* Top row: logo + basic info */}
         <div className="w-full flex flex-col md:flex-row gap-8 mb-4">
           {/* Logo upload, 1/3 width */}
@@ -175,18 +175,18 @@ const CompanyDetails = () => {
                     onClick={() => setIsEditing(!isEditing)}
                     className="inline-flex items-center text-xs text-blue-600 border border-blue-600 bg-white rounded-md px-3 py-1.5 hover:bg-blue-50 hover:border-blue-700 hover:text-blue-700"
                     style={{ boxShadow: 'none' }}
-                  >
-                    {isEditing ? (
-                      <>
+            >
+              {isEditing ? (
+                <>
                         <CheckIcon className="h-4 w-4 mr-1" /> Save
-                      </>
-                    ) : (
-                      <>
+                </>
+              ) : (
+                <>
                         <PencilIcon className="h-4 w-4 mr-1" /> Edit
-                      </>
-                    )}
-                  </button>
-                </div>
+                </>
+              )}
+            </button>
+          </div>
               </div>
               <div className="px-6 pb-6 pt-0 space-y-4">
                 {/* Field: Company Name */}
@@ -238,7 +238,7 @@ const CompanyDetails = () => {
                   className="inline-flex items-center text-xs text-blue-600 border border-blue-600 bg-white rounded-md px-3 py-1.5 hover:bg-blue-50 hover:border-blue-700 hover:text-blue-700"
                   style={{ boxShadow: 'none' }}
                 >
-                  {isEditing ? (
+          {isEditing ? (
                     <>
                       <CheckIcon className="h-4 w-4 mr-1" /> Save
                     </>
@@ -353,20 +353,20 @@ const CompanyDetails = () => {
         </div>
         {isEditing && (
           <div className="flex justify-end space-x-2 pt-4">
-            <button
-              onClick={handleCancel}
-              className="px-4 py-2 text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleSave}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-            >
-              Save Changes
-            </button>
-          </div>
-        )}
+                <button
+                  onClick={handleCancel}
+                  className="px-4 py-2 text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSave}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                >
+                  Save Changes
+                </button>
+            </div>
+          )}
       </div>
     </div>
   );

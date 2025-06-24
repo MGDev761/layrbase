@@ -63,10 +63,10 @@ const ExitScenarios = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center space-x-2">
-        <CurrencyPoundIcon className="h-6 w-6 text-purple-600" />
-        <h2 className="text-xl font-bold text-gray-900">Exit Scenarios</h2>
+      {/* Page Header */}
+      <div className="border-b border-gray-200 pb-4">
+        <h1 className="text-2xl font-bold text-gray-900">Exit Scenarios</h1>
+        <p className="text-sm text-gray-600 mt-1">Model different exit scenarios and their impact on shareholder returns</p>
       </div>
 
       {/* Exit Scenario Inputs */}

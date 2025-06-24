@@ -72,10 +72,18 @@ const OwnershipSummary = () => {
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-      {metrics.map((metric, index) => (
-        <MetricCard key={index} {...metric} />
-      ))}
+    <div className="space-y-6">
+      {/* Page Header */}
+      <div className="border-b border-gray-200 pb-4">
+        <h1 className="text-2xl font-bold text-gray-900">Ownership Summary</h1>
+        <p className="text-sm text-gray-600 mt-1">Overview of your company's share structure and ownership metrics</p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {metrics.map((metric, index) => (
+          <MetricCard key={index} {...metric} />
+        ))}
+      </div>
     </div>
   );
 };

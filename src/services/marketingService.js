@@ -167,6 +167,7 @@ export const getBrandInformation = async (organizationId) => {
 
 export const upsertBrandInformation = async (brandData, organizationId) => {
   try {
+    console.log('upsertBrandInformation called with:', { brandData, organizationId });
     const { data, error } = await supabase
       .from('brand_information')
       .upsert([{
@@ -177,6 +178,7 @@ export const upsertBrandInformation = async (brandData, organizationId) => {
       .select()
       .single();
 
+    console.log('Supabase response:', { data, error });
     if (error) throw error;
     return data;
   } catch (error) {
@@ -282,6 +284,25 @@ export const deleteSalesCollateral = async (collateralId) => {
     return true;
   } catch (error) {
     console.error('Error deleting sales collateral:', error);
+    throw error;
+  }
+};
+
+// Get upcoming marketing events for dashboard
+export const getUpcomingMarketingEvents = async (organizationId, limit = 5) => {
+  try {
+    const { data, error } = await supabase
+      .from('marketing_events')
+      .select('*')
+      .eq('organization_id', organizationId)
+      .gte('event_date', new Date().toISOString().split('T')[0])
+      .order('event_date', { ascending: true })
+      .limit(limit);
+
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    console.error('Error fetching upcoming marketing events:', error);
     throw error;
   }
 }; 

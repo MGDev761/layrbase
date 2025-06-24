@@ -102,6 +102,12 @@ const CapTableContent = () => {
 
   return (
     <div className="space-y-6">
+      {/* Page Header */}
+      <div className="border-b border-gray-200 pb-4">
+        <h1 className="text-2xl font-bold text-gray-900">Cap Table Overview</h1>
+        <p className="text-sm text-gray-600 mt-1">View and manage your company's ownership structure and shareholder information</p>
+      </div>
+
       {/* Header Controls */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <select 

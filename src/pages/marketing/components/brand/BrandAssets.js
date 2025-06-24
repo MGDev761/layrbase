@@ -157,6 +157,52 @@ const BrandAssets = () => {
     }));
   };
 
+  const handleUpdateColor = async (index, color) => {
+    const updatedBrandInfo = {
+      ...brandInfo,
+      color_palette: brandInfo.color_palette.map((c, i) => i === index ? color : c)
+    };
+    setBrandInfo(updatedBrandInfo);
+    try {
+      setSaving(true);
+      console.log('Saving brand info:', updatedBrandInfo);
+      console.log('Organization ID:', currentOrganization.organization_id);
+      const result = await upsertBrandInformation(updatedBrandInfo, currentOrganization.organization_id);
+      console.log('Save result:', result);
+      setActiveColorIndex(null);
+      setAddingColor(false);
+      setNewColorValue('#000000');
+    } catch (error) {
+      console.error('Error saving color:', error);
+      alert('Failed to save color. Please try again.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleAddColor = async (color) => {
+    const updatedBrandInfo = {
+      ...brandInfo,
+      color_palette: [...brandInfo.color_palette, color]
+    };
+    setBrandInfo(updatedBrandInfo);
+    try {
+      setSaving(true);
+      console.log('Saving brand info:', updatedBrandInfo);
+      console.log('Organization ID:', currentOrganization.organization_id);
+      const result = await upsertBrandInformation(updatedBrandInfo, currentOrganization.organization_id);
+      console.log('Save result:', result);
+      setActiveColorIndex(null);
+      setAddingColor(false);
+      setNewColorValue('#000000');
+    } catch (error) {
+      console.error('Error saving color:', error);
+      alert('Failed to save color. Please try again.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="text-center py-10">
@@ -270,33 +316,43 @@ const BrandAssets = () => {
                   </div>
                   {/* Color wheel and save/cancel in edit mode */}
                   {activeColorIndex === index && (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/30 rounded-lg z-10">
-                      <input
-                        type="color"
-                        value={color}
-                        onChange={e => setNewColorValue(e.target.value)}
-                        className="w-16 h-16 border-2 border-white rounded-full shadow mb-2"
-                        autoFocus
-                      />
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => { updateColor(index, newColorValue); setActiveColorIndex(null); }}
-                          className="px-2 py-1 text-xs rounded bg-white text-gray-700 border border-gray-200 hover:bg-gray-100"
-                        >
-                          Save
-                        </button>
-                        <button
-                          onClick={() => setActiveColorIndex(null)}
-                          className="px-2 py-1 text-xs rounded bg-gray-200 text-gray-700 border border-gray-300 hover:bg-gray-300"
-                        >
-                          Cancel
-                        </button>
-                        <button
-                          onClick={() => { removeColor(index); setActiveColorIndex(null); }}
-                          className="px-2 py-1 text-xs rounded bg-red-600 text-white border border-red-700 hover:bg-red-700"
-                        >
-                          Remove
-                        </button>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/30 rounded-lg z-50">
+                      <div className="bg-white rounded-lg p-4 shadow-lg relative z-50 transform -translate-x-20">
+                        <input
+                          type="color"
+                          value={color}
+                          onChange={e => setNewColorValue(e.target.value)}
+                          className="w-16 h-16 border-2 border-white rounded-full shadow mb-3 mx-auto block"
+                          autoFocus
+                        />
+                        <input
+                          type="text"
+                          value={newColorValue}
+                          onChange={e => setNewColorValue(e.target.value)}
+                          className="w-full px-2 py-1 text-xs border border-gray-300 rounded mb-3 text-center font-mono"
+                          placeholder="#000000"
+                        />
+                        <div className="flex gap-2">
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleUpdateColor(index, newColorValue); }}
+                            disabled={saving}
+                            className="px-2 py-1 text-xs rounded bg-white text-gray-700 border border-gray-200 hover:bg-gray-100 disabled:opacity-50"
+                          >
+                            {saving ? 'Saving...' : 'Save'}
+                          </button>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); setActiveColorIndex(null); }}
+                            className="px-2 py-1 text-xs rounded bg-gray-200 text-gray-700 border border-gray-300 hover:bg-gray-300"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); removeColor(index); setActiveColorIndex(null); }}
+                            className="px-2 py-1 text-xs rounded bg-red-600 text-white border border-red-700 hover:bg-red-700"
+                          >
+                            Remove
+                          </button>
+                        </div>
                       </div>
                     </div>
                   )}
@@ -315,27 +371,37 @@ const BrandAssets = () => {
                 <span className="text-xs text-gray-400">Add Color</span>
               </div>
               {addingColor && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/30 rounded-lg z-10">
-                  <input
-                    type="color"
-                    value={newColorValue}
-                    onChange={e => setNewColorValue(e.target.value)}
-                    className="w-16 h-16 border-2 border-white rounded-full shadow mb-2"
-                    autoFocus
-                  />
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => { addColor(newColorValue); setAddingColor(false); setNewColorValue('#000000'); }}
-                      className="px-2 py-1 text-xs rounded bg-white text-gray-700 border border-gray-200 hover:bg-gray-100"
-                    >
-                      Save
-                    </button>
-                    <button
-                      onClick={() => { setAddingColor(false); setNewColorValue('#000000'); }}
-                      className="px-2 py-1 text-xs rounded bg-gray-200 text-gray-700 border border-gray-300 hover:bg-gray-300"
-                    >
-                      Cancel
-                    </button>
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/30 rounded-lg z-50">
+                  <div className="bg-white rounded-lg p-4 shadow-lg relative z-50 transform -translate-x-20">
+                    <input
+                      type="color"
+                      value={newColorValue}
+                      onChange={e => setNewColorValue(e.target.value)}
+                      className="w-16 h-16 border-2 border-white rounded-full shadow mb-3 mx-auto block"
+                      autoFocus
+                    />
+                    <input
+                      type="text"
+                      value={newColorValue}
+                      onChange={e => setNewColorValue(e.target.value)}
+                      className="w-full px-2 py-1 text-xs border border-gray-300 rounded mb-3 text-center font-mono"
+                      placeholder="#000000"
+                    />
+                    <div className="flex gap-2">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); handleAddColor(newColorValue); }}
+                        disabled={saving}
+                        className="px-2 py-1 text-xs rounded bg-white text-gray-700 border border-gray-200 hover:bg-gray-100 disabled:opacity-50"
+                      >
+                        {saving ? 'Saving...' : 'Save'}
+                      </button>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setAddingColor(false); setNewColorValue('#000000'); }}
+                        className="px-2 py-1 text-xs rounded bg-gray-200 text-gray-700 border border-gray-300 hover:bg-gray-300"
+                      >
+                        Cancel
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}
@@ -463,7 +529,7 @@ const BrandAssets = () => {
                         Download
                       </a>
                       <button
-                        onClick={() => handleDeleteAsset(asset.id)}
+                        onClick={(e) => { e.stopPropagation(); handleDeleteAsset(asset.id); }}
                         className="text-red-600 hover:text-red-900"
                       >
                         Delete

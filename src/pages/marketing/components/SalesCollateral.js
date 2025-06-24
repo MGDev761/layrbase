@@ -142,7 +142,7 @@ const SalesCollateral = () => {
   };
 
   if (loading) {
-    return (
+  return (
       <div className="text-center py-10">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
         <p className="mt-2 text-gray-500">Loading sales collateral...</p>
@@ -266,7 +266,7 @@ const SalesCollateral = () => {
                   <td className="px-4 py-3 whitespace-nowrap">
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                       {collateralTypes.find(t => t.value === item.collateral_type)?.label || item.collateral_type}
-                    </span>
+            </span>
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
                     {formatFileSize(item.file_size)}
@@ -296,16 +296,16 @@ const SalesCollateral = () => {
                             <button className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                               Edit
                             </button>
-                            <button
+          <button
                               onClick={() => handleDeleteCollateral(item.id)}
                               className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
-                            >
+          >
                               Delete
-                            </button>
+          </button>
                           </div>
-                        )}
-                      </div>
-                    </div>
+        )}
+      </div>
+    </div>
                   </td>
                 </tr>
               ))
@@ -313,7 +313,7 @@ const SalesCollateral = () => {
           </tbody>
         </table>
       </div>
-
+      
       {/* Upload Modal */}
       {showUploadModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -381,14 +381,14 @@ const SalesCollateral = () => {
               >
                 Cancel
               </button>
-              <button
+        <button
                 onClick={handleUploadCollateral}
                 disabled={saving || !selectedFile || !newCollateral.name}
                 className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 disabled:opacity-50"
-              >
+        >
                 {saving ? 'Uploading...' : 'Upload Collateral'}
-              </button>
-            </div>
+        </button>
+      </div>
           </div>
         </div>
       )}

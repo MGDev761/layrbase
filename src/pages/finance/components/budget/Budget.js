@@ -179,8 +179,8 @@ const Budget = () => {
 
       {activeTab === 'budget' ? (
         <>
-          {/* Add item button */}
-          <div className="mb-2 flex gap-2 items-end">
+          {/* Controls row: Add item, year, lock, toggle (right) */}
+          <div className="mb-2 flex items-end gap-2 w-full">
             <button
               className="px-4 py-2 rounded-md bg-purple-600 text-white text-sm font-semibold hover:bg-purple-700"
               onClick={() => setShowModal(true)}
@@ -196,28 +196,6 @@ const Budget = () => {
                 <option key={year} value={year}>{year}</option>
               ))}
             </select>
-            <div className="flex border border-gray-300 rounded-md">
-              <button
-                onClick={() => setViewMode('months')}
-                className={`px-3 py-2 text-sm font-medium ${
-                  viewMode === 'months' 
-                    ? 'bg-purple-600 text-white' 
-                    : 'bg-white text-gray-700 hover:bg-gray-50'
-                }`}
-              >
-                Months
-              </button>
-              <button
-                onClick={() => setViewMode('quarters')}
-                className={`px-3 py-2 text-sm font-medium border-l ${
-                  viewMode === 'quarters' 
-                    ? 'bg-purple-600 text-white' 
-                    : 'bg-white text-gray-700 hover:bg-gray-50'
-                }`}
-              >
-                Quarters
-              </button>
-            </div>
             <button
               className={`px-4 py-2 rounded-md text-sm font-semibold flex items-center gap-2 ${
                 isBudgetLocked 
@@ -231,182 +209,25 @@ const Budget = () => {
               </svg>
               {isBudgetLocked ? 'Unlock Budget' : 'Lock Budget'}
             </button>
-          </div>
-          {/* Modal */}
-          {showModal && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
-              <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-lg">
-                <h3 className="text-lg font-semibold mb-4">Add Budget Item</h3>
-                <div className="bg-gray-50 rounded-lg p-4 mb-4">
-                  <form className="space-y-4" onSubmit={handleAddItem}>
-                    <div className="flex items-center">
-                      <label className="block text-sm font-medium text-gray-700 w-36">Type</label>
-                      <select
-                        value={modalType}
-                        onChange={e => setModalType(e.target.value)}
-                        className="flex-1 rounded-md border-gray-300 focus:ring-purple-500 focus:border-purple-500"
-                      >
-                        <option value="revenue">Revenue</option>
-                        <option value="expense">Expense</option>
-                      </select>
-                    </div>
-                    <div className="flex items-center">
-                      <label className="block text-sm font-medium text-gray-700 w-36">Category</label>
-                      <div className="flex-1 relative">
-                        <select
-                          value={modalCategory}
-                          onChange={e => {
-                            if (e.target.value === 'add-new') {
-                              setShowAddCategory(true);
-                            } else {
-                              setModalCategory(e.target.value);
-                            }
-                          }}
-                          className="w-full rounded-md border-gray-300 focus:ring-purple-500 focus:border-purple-500"
-                        >
-                          <option value="">Select category</option>
-                          {categories[modalType]?.map(cat => (
-                            <option key={cat} value={cat}>{cat}</option>
-                          ))}
-                          <option value="add-new" className="text-purple-600 font-medium">+ Add new category</option>
-                        </select>
-                      </div>
-                    </div>
-                    {showAddCategory && (
-                      <div className="flex items-center ml-36">
-                        <input
-                          type="text"
-                          value={newCategory}
-                          onChange={e => setNewCategory(e.target.value)}
-                          placeholder="New category name"
-                          className="flex-1 rounded-md border-gray-300 focus:ring-purple-500 focus:border-purple-500 text-sm"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => {
-                            if (newCategory) {
-                              categories[modalType].push(newCategory);
-                              setModalCategory(newCategory);
-                              setNewCategory('');
-                              setShowAddCategory(false);
-                            }
-                          }}
-                          className="ml-2 px-3 py-1 bg-purple-600 text-white rounded text-xs hover:bg-purple-700"
-                        >
-                          Add
-                        </button>
-                      </div>
-                    )}
-                    <div className="flex items-center">
-                      <label className="block text-sm font-medium text-gray-700 w-36">Subcategory</label>
-                      <div className="flex-1 relative">
-                        <select
-                          value={modalSubcategory}
-                          onChange={e => {
-                            if (e.target.value === 'add-new') {
-                              setShowAddSubcategory(true);
-                            } else {
-                              setModalSubcategory(e.target.value);
-                            }
-                          }}
-                          className="w-full rounded-md border-gray-300 focus:ring-purple-500 focus:border-purple-500"
-                          disabled={!modalCategory}
-                        >
-                          <option value="">Select subcategory</option>
-                          {subcategories[modalCategory]?.map(subcat => (
-                            <option key={subcat} value={subcat}>{subcat}</option>
-                          ))}
-                          <option value="add-new" className="text-purple-600 font-medium">+ Add new subcategory</option>
-                        </select>
-                      </div>
-                    </div>
-                    {showAddSubcategory && (
-                      <div className="flex items-center ml-36">
-                        <input
-                          type="text"
-                          value={newSubcategory}
-                          onChange={e => setNewSubcategory(e.target.value)}
-                          placeholder="New subcategory name"
-                          className="flex-1 rounded-md border-gray-300 focus:ring-purple-500 focus:border-purple-500 text-sm"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => {
-                            if (newSubcategory) {
-                              if (!subcategories[modalCategory]) {
-                                subcategories[modalCategory] = [];
-                              }
-                              subcategories[modalCategory].push(newSubcategory);
-                              setModalSubcategory(newSubcategory);
-                              setNewSubcategory('');
-                              setShowAddSubcategory(false);
-                            }
-                          }}
-                          className="ml-2 px-3 py-1 bg-purple-600 text-white rounded text-xs hover:bg-purple-700"
-                        >
-                          Add
-                        </button>
-                      </div>
-                    )}
-                    <div className="flex items-center">
-                      <label className="block text-sm font-medium text-gray-700 w-36">Repeating or One-off?</label>
-                      <div className="flex-1 flex w-48">
-                        <button
-                          type="button"
-                          onClick={() => setModalRepeat('Repeating')}
-                          className={`flex-1 py-1.5 px-3 text-xs font-medium rounded-l-md border ${
-                            modalRepeat === 'Repeating'
-                              ? 'bg-purple-600 text-white border-purple-600'
-                              : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-                          }`}
-                        >
-                          Repeating
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setModalRepeat('One-off')}
-                          className={`flex-1 py-1.5 px-3 text-xs font-medium rounded-r-md border-t border-r border-b ${
-                            modalRepeat === 'One-off'
-                              ? 'bg-purple-600 text-white border-purple-600'
-                              : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-                          }`}
-                        >
-                          One-off
-                        </button>
-                      </div>
-                    </div>
-                    <div className="flex items-center">
-                      <label className="block text-sm font-medium text-gray-700 w-36">Monthly Amount</label>
-                      <input
-                        type="number"
-                        value={modalAmount}
-                        onChange={e => setModalAmount(e.target.value)}
-                        className="flex-1 rounded-md border-gray-300 focus:ring-purple-500 focus:border-purple-500"
-                        placeholder="e.g. 1000"
-                      />
-                    </div>
-                  </form>
-                </div>
-                <div className="flex justify-end gap-2">
-                  <button
-                    type="button"
-                    className="px-4 py-2 rounded-md bg-gray-100 text-gray-700 font-medium hover:bg-gray-200"
-                    onClick={() => setShowModal(false)}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-4 py-2 rounded-md bg-purple-600 text-white font-semibold hover:bg-purple-700"
-                    onClick={handleAddItem}
-                  >
-                    Add
-                  </button>
-                </div>
-              </div>
+            <div className="ml-auto flex items-center bg-purple-100 rounded-md p-0.5 shadow-inner">
+              <button
+                onClick={() => setViewMode('months')}
+                className={`px-3 py-1.5 text-sm font-semibold rounded-md transition-all duration-150 focus:outline-none
+                  ${viewMode === 'months' ? 'bg-white text-purple-700 shadow z-10' : 'bg-transparent text-purple-600'}`}
+              >
+                Months
+              </button>
+              <button
+                onClick={() => setViewMode('quarters')}
+                className={`px-3 py-1.5 text-sm font-semibold rounded-md transition-all duration-150 focus:outline-none
+                  ${viewMode === 'quarters' ? 'bg-white text-purple-700 shadow z-10' : 'bg-transparent text-purple-600'}`}
+              >
+                Quarters
+              </button>
             </div>
-          )}
-          {/* Card/table */}
+          </div>
+
+          {/* Table remains in its own overflow-x-auto box below */}
           <div className="bg-white rounded-xl shadow border border-gray-100 p-6">
             <div className="overflow-x-auto">
               <table className="min-w-full text-sm border border-gray-200 rounded-lg">
