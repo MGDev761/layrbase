@@ -1,82 +1,91 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../../contexts/AuthContext';
+import { fetchHolidays, addHoliday, updateHoliday, deleteHoliday } from '../../../services/holidaysService';
+import { fetchEmployees } from '../../../services/employeesService';
 import Card from '../../../components/common/layout/Card';
 
+const initialForm = {
+  employee_id: '',
+  start_date: '',
+  end_date: '',
+  days: 1,
+  reason: '',
+  status: 'pending'
+};
+
 const TimeManager = () => {
+  const { currentOrganization } = useAuth();
+  const [holidays, setHolidays] = useState([]);
+  const [employees, setEmployees] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [form, setForm] = useState(initialForm);
+  const [editingId, setEditingId] = useState(null);
+  const [deleteId, setDeleteId] = useState(null);
+  const [saving, setSaving] = useState(false);
   const [filterStatus, setFilterStatus] = useState('all');
 
-  // Mock holiday request data
-  const holidayRequests = [
-    {
-      id: 1,
-      employeeName: 'Emily Rodriguez',
-      employeeEmail: 'emily.rodriguez@company.com',
-      requestType: 'Holiday',
-      startDate: '2024-07-15',
-      endDate: '2024-07-19',
-      days: 5,
-      reason: 'Summer vacation with family',
-      status: 'pending',
-      submittedDate: '2024-06-01',
-      manager: 'Michael Chen',
-      remainingHolidays: 7
-    },
-    {
-      id: 2,
-      employeeName: 'David Kim',
-      employeeEmail: 'david.kim@company.com',
-      requestType: 'Sick Leave',
-      startDate: '2024-06-10',
-      endDate: '2024-06-12',
-      days: 3,
-      reason: 'Medical appointment and recovery',
-      status: 'approved',
-      submittedDate: '2024-06-08',
-      manager: 'Sarah Johnson',
-      remainingHolidays: 15
-    },
-    {
-      id: 3,
-      employeeName: 'Lisa Thompson',
-      employeeEmail: 'lisa.thompson@company.com',
-      requestType: 'Holiday',
-      startDate: '2024-08-05',
-      endDate: '2024-08-09',
-      days: 5,
-      reason: 'Personal time off',
-      status: 'approved',
-      submittedDate: '2024-06-15',
-      manager: 'Sarah Johnson',
-      remainingHolidays: 17
-    },
-    {
-      id: 4,
-      employeeName: 'Michael Chen',
-      employeeEmail: 'michael.chen@company.com',
-      requestType: 'Holiday',
-      startDate: '2024-09-20',
-      endDate: '2024-09-27',
-      days: 8,
-      reason: 'Conference attendance and vacation',
-      status: 'pending',
-      submittedDate: '2024-06-20',
-      manager: 'Sarah Johnson',
-      remainingHolidays: 13
-    },
-    {
-      id: 5,
-      employeeName: 'Sarah Johnson',
-      employeeEmail: 'sarah.johnson@company.com',
-      requestType: 'Holiday',
-      startDate: '2024-07-01',
-      endDate: '2024-07-05',
-      days: 5,
-      reason: 'Independence Day long weekend',
-      status: 'approved',
-      submittedDate: '2024-05-25',
-      manager: null,
-      remainingHolidays: 10
+  const loadData = () => {
+    if (!currentOrganization) return;
+    setLoading(true);
+    Promise.all([
+      fetchHolidays(currentOrganization.organization_id),
+      fetchEmployees(currentOrganization.organization_id)
+    ])
+      .then(([holidays, employees]) => {
+        setHolidays(holidays);
+        setEmployees(employees);
+      })
+      .catch(setError)
+      .finally(() => setLoading(false));
+  };
+  useEffect(() => { loadData(); /* eslint-disable-next-line */ }, [currentOrganization]);
+
+  const openModal = (holiday = null) => {
+    setEditingId(holiday ? holiday.id : null);
+    setForm(holiday ? {
+      employee_id: holiday.employee_id,
+      start_date: holiday.start_date,
+      end_date: holiday.end_date,
+      days: holiday.days,
+      reason: holiday.reason,
+      status: holiday.status
+    } : initialForm);
+    setModalOpen(true);
+  };
+  const openDeleteModal = (id) => { setDeleteId(id); setDeleteModalOpen(true); };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      if (editingId) {
+        await updateHoliday(editingId, form);
+      } else {
+        await addHoliday(form);
+      }
+      setModalOpen(false);
+      loadData();
+    } catch (err) {
+      setError(err);
+    } finally {
+      setSaving(false);
     }
-  ];
+  };
+  const handleDelete = async () => {
+    setSaving(true);
+    try {
+      await deleteHoliday(deleteId);
+      setDeleteModalOpen(false);
+      loadData();
+    } catch (err) {
+      setError(err);
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString();
@@ -99,9 +108,11 @@ const TimeManager = () => {
     return status.charAt(0).toUpperCase() + status.slice(1);
   };
 
-  const filteredRequests = filterStatus === 'all' 
-    ? holidayRequests 
-    : holidayRequests.filter(request => request.status === filterStatus);
+  const filteredRequests = filterStatus === 'all' ? holidays : holidays.filter(request => request.status === filterStatus);
+
+  if (!currentOrganization) return <div>Select an organization</div>;
+  if (loading) return <div>Loading holiday requests...</div>;
+  if (error) return <div className="text-red-500">Error: {error.message}</div>;
 
   return (
     <div>
@@ -125,8 +136,8 @@ const TimeManager = () => {
           </select>
         </div>
 
-        <button className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2">
-          Submit Request
+        <button onClick={() => openModal()} className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2">
+          Add Request
         </button>
       </div>
 
@@ -169,63 +180,110 @@ const TimeManager = () => {
                 </td>
               </tr>
             ) : (
-              filteredRequests.map((request) => (
-                <tr key={request.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <div className="flex-shrink-0 h-10 w-10">
-                        <div className="h-10 w-10 bg-gray-100 rounded-full flex items-center justify-center">
-                          <span className="text-sm font-medium text-gray-700">
-                            {request.employeeName.split(' ').map(n => n[0]).join('')}
-                          </span>
+              filteredRequests.map((request) => {
+                // Defensive: get employee name/email from joined employee object
+                const employee = request.employee || {};
+                const employeeName = employee.name || 'Unknown';
+                const employeeEmail = employee.email || '';
+                // Defensive: fallback for initials
+                const initials = employeeName ? employeeName.split(' ').map(n => n[0]).join('') : '?';
+                // Use correct field names from holidays table
+                const startDate = request.start_date;
+                const endDate = request.end_date;
+                const submittedDate = request.created_at;
+                const requestType = request.reason ? 'Holiday' : 'Time Off';
+                return (
+                  <tr key={request.id} className="hover:bg-gray-50">
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <div className="flex-shrink-0 h-10 w-10">
+                          <div className="h-10 w-10 bg-gray-100 rounded-full flex items-center justify-center">
+                            <span className="text-sm font-medium text-gray-700">
+                              {initials}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="ml-4">
+                          <div className="text-sm font-medium text-gray-900">{employeeName}</div>
+                          <div className="text-sm text-gray-500">{employeeEmail}</div>
                         </div>
                       </div>
-                      <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900">{request.employeeName}</div>
-                        <div className="text-sm text-gray-500">{request.employeeEmail}</div>
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-900">{requestType}</div>
+                      <div className="text-sm text-gray-500">{request.days} days</div>
+                      <div className="text-xs text-gray-400 max-w-xs truncate">{request.reason}</div>
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">{formatDate(startDate)}</div>
+                      <div className="text-sm text-gray-500">to {formatDate(endDate)}</div>
+                      <div className="text-xs text-gray-400">Submitted: {formatDate(submittedDate)}</div>
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                      {request.manager || '-'}
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(request.status)}`}>
+                        {getStatusText(request.status)}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm font-medium">
+                      <div className="flex items-center space-x-2">
+                        <button onClick={() => openModal(request)} className="text-purple-600 hover:text-purple-900">Edit</button>
+                        <button onClick={() => openDeleteModal(request.id)} className="text-red-500 hover:text-red-700">Delete</button>
                       </div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">{request.requestType}</div>
-                    <div className="text-sm text-gray-500">{request.days} days</div>
-                    <div className="text-xs text-gray-400 max-w-xs truncate">{request.reason}</div>
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{formatDate(request.startDate)}</div>
-                    <div className="text-sm text-gray-500">to {formatDate(request.endDate)}</div>
-                    <div className="text-xs text-gray-400">Submitted: {formatDate(request.submittedDate)}</div>
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-                    {request.manager || '-'}
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(request.status)}`}>
-                      {getStatusText(request.status)}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm font-medium">
-                    <div className="flex items-center space-x-2">
-                      {request.status === 'pending' && (
-                        <>
-                          <button className="text-green-600 hover:text-green-900">Approve</button>
-                          <button className="text-red-600 hover:text-red-900">Reject</button>
-                        </>
-                      )}
-                      <button className="text-purple-600 hover:text-purple-900">View</button>
-                      <button className="text-gray-400 hover:text-gray-600">
-                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-                        </svg>
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))
+                    </td>
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </table>
       </div>
+
+      {/* Add/Edit Modal */}
+      {modalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+          <form onSubmit={handleSubmit} className="bg-white rounded-lg p-6 w-full max-w-md">
+            <h2 className="text-lg font-semibold mb-4">{editingId ? 'Edit' : 'Add'} Holiday Request</h2>
+            <div className="space-y-3">
+              <select className="w-full px-3 py-2 border rounded" value={form.employee_id} onChange={e => setForm(f => ({ ...f, employee_id: Number(e.target.value) }))} required>
+                <option value="">Select Employee</option>
+                {employees.map(e => (
+                  <option key={e.id} value={e.id}>{e.name}</option>
+                ))}
+              </select>
+              <input className="w-full px-3 py-2 border rounded" type="date" value={form.start_date} onChange={e => setForm(f => ({ ...f, start_date: e.target.value }))} required />
+              <input className="w-full px-3 py-2 border rounded" type="date" value={form.end_date} onChange={e => setForm(f => ({ ...f, end_date: e.target.value }))} required />
+              <input className="w-full px-3 py-2 border rounded" type="number" min="1" value={form.days} onChange={e => setForm(f => ({ ...f, days: Number(e.target.value) }))} required />
+              <textarea className="w-full px-3 py-2 border rounded" placeholder="Reason" value={form.reason} onChange={e => setForm(f => ({ ...f, reason: e.target.value }))} />
+              <select className="w-full px-3 py-2 border rounded" value={form.status} onChange={e => setForm(f => ({ ...f, status: e.target.value }))}>
+                <option value="pending">Pending</option>
+                <option value="approved">Approved</option>
+                <option value="rejected">Rejected</option>
+              </select>
+            </div>
+            <div className="flex justify-end space-x-2 mt-4">
+              <button type="button" onClick={() => setModalOpen(false)} className="px-4 py-2 bg-gray-100 rounded">Cancel</button>
+              <button type="submit" disabled={saving} className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700">{saving ? 'Saving...' : 'Save'}</button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* Delete Modal */}
+      {deleteModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-sm">
+            <h2 className="text-lg font-semibold mb-4">Delete Holiday Request</h2>
+            <p>Are you sure you want to delete this request?</p>
+            <div className="flex justify-end space-x-2 mt-4">
+              <button type="button" onClick={() => setDeleteModalOpen(false)} className="px-4 py-2 bg-gray-100 rounded">Cancel</button>
+              <button type="button" onClick={handleDelete} disabled={saving} className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">{saving ? 'Deleting...' : 'Delete'}</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

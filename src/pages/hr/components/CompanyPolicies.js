@@ -1,117 +1,100 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../../contexts/AuthContext';
+import { fetchPolicies, addPolicy, updatePolicy, deletePolicy, uploadPolicyFile } from '../../../services/policiesService';
 import Card from '../../../components/common/layout/Card';
 
+const initialForm = {
+  name: '',
+  category: '',
+  description: '',
+  version: '',
+  last_updated: '',
+  file: null,
+  file_url: '',
+  department: '',
+  required_reading: false
+};
+
 const CompanyPolicies = () => {
+  const { currentOrganization } = useAuth();
+  const [policies, setPolicies] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('all');
+  const [modalOpen, setModalOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [form, setForm] = useState(initialForm);
+  const [editingId, setEditingId] = useState(null);
+  const [deleteId, setDeleteId] = useState(null);
+  const [saving, setSaving] = useState(false);
 
-  // Mock policy data
-  const policies = [
-    {
-      id: 1,
-      name: 'Staff Handbook',
-      category: 'General',
-      description: 'Comprehensive guide covering company culture, values, and general policies for all employees.',
-      version: '2.1',
-      lastUpdated: '2024-01-15',
-      status: 'active',
-      fileSize: '2.4 MB',
-      fileType: 'PDF',
-      department: 'HR',
-      requiredReading: true
-    },
-    {
-      id: 2,
-      name: 'Expenses Policy',
-      category: 'Finance',
-      description: 'Guidelines for submitting and approving business expenses, including travel and entertainment.',
-      version: '1.8',
-      lastUpdated: '2024-02-20',
-      status: 'active',
-      fileSize: '1.2 MB',
-      fileType: 'PDF',
-      department: 'Finance',
-      requiredReading: true
-    },
-    {
-      id: 3,
-      name: 'Remote Work Policy',
-      category: 'Workplace',
-      description: 'Policy governing remote work arrangements, expectations, and communication protocols.',
-      version: '3.0',
-      lastUpdated: '2024-03-10',
-      status: 'active',
-      fileSize: '856 KB',
-      fileType: 'PDF',
-      department: 'HR',
-      requiredReading: true
-    },
-    {
-      id: 4,
-      name: 'IT Security Policy',
-      category: 'Technology',
-      description: 'Security guidelines for handling company data, passwords, and technology resources.',
-      version: '2.3',
-      lastUpdated: '2024-01-30',
-      status: 'active',
-      fileSize: '1.8 MB',
-      fileType: 'PDF',
-      department: 'IT',
-      requiredReading: true
-    },
-    {
-      id: 5,
-      name: 'Leave and Time Off Policy',
-      category: 'HR',
-      description: 'Comprehensive policy covering vacation, sick leave, personal days, and other time off.',
-      version: '1.5',
-      lastUpdated: '2024-02-05',
-      status: 'active',
-      fileSize: '1.1 MB',
-      fileType: 'PDF',
-      department: 'HR',
-      requiredReading: true
-    },
-    {
-      id: 6,
-      name: 'Dress Code Policy',
-      category: 'Workplace',
-      description: 'Guidelines for appropriate workplace attire and professional appearance standards.',
-      version: '1.2',
-      lastUpdated: '2023-12-15',
-      status: 'active',
-      fileSize: '512 KB',
-      fileType: 'PDF',
-      department: 'HR',
-      requiredReading: false
-    },
-    {
-      id: 7,
-      name: 'Social Media Policy',
-      category: 'Communication',
-      description: 'Guidelines for employee social media use and representation of the company online.',
-      version: '1.7',
-      lastUpdated: '2024-01-20',
-      status: 'active',
-      fileSize: '768 KB',
-      fileType: 'PDF',
-      department: 'Marketing',
-      requiredReading: true
-    },
-    {
-      id: 8,
-      name: 'Health and Safety Policy',
-      category: 'Workplace',
-      description: 'Workplace safety guidelines and procedures for maintaining a safe work environment.',
-      version: '2.0',
-      lastUpdated: '2024-02-28',
-      status: 'active',
-      fileSize: '1.5 MB',
-      fileType: 'PDF',
-      department: 'Operations',
-      requiredReading: true
+  const loadPolicies = () => {
+    if (!currentOrganization) return;
+    setLoading(true);
+    fetchPolicies(currentOrganization.organization_id)
+      .then(setPolicies)
+      .catch(setError)
+      .finally(() => setLoading(false));
+  };
+  useEffect(() => { loadPolicies(); /* eslint-disable-next-line */ }, [currentOrganization]);
+
+  const openModal = (policy = null) => {
+    setEditingId(policy ? policy.id : null);
+    setForm(policy ? {
+      name: policy.name || '',
+      category: policy.category || '',
+      description: policy.description || '',
+      version: policy.version || '',
+      last_updated: policy.last_updated || '',
+      file: null,
+      file_url: policy.file_url || '',
+      department: policy.department || '',
+      required_reading: !!policy.required_reading
+    } : initialForm);
+    setModalOpen(true);
+  };
+  const openDeleteModal = (id) => { setDeleteId(id); setDeleteModalOpen(true); };
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setForm(f => ({ ...f, file }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      let file_url = form.file_url;
+      if (form.file) {
+        file_url = await uploadPolicyFile(form.file, currentOrganization.organization_id);
+      }
+      if (editingId) {
+        await updatePolicy(editingId, { ...form, file_url });
+      } else {
+        await addPolicy({ ...form, file_url, organization_id: currentOrganization.organization_id });
+      }
+      setModalOpen(false);
+      loadPolicies();
+    } catch (err) {
+      setError(err);
+    } finally {
+      setSaving(false);
     }
-  ];
+  };
+  const handleDelete = async () => {
+    setSaving(true);
+    try {
+      await deletePolicy(deleteId);
+      setDeleteModalOpen(false);
+      loadPolicies();
+    } catch (err) {
+      setError(err);
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const categories = ['all', 'General', 'Finance', 'Workplace', 'Technology', 'HR', 'Communication'];
 
@@ -129,6 +112,10 @@ const CompanyPolicies = () => {
     const matchesCategory = filterCategory === 'all' || policy.category === filterCategory;
     return matchesSearch && matchesCategory;
   });
+
+  if (!currentOrganization) return <div>Select an organization</div>;
+  if (loading) return <div>Loading policies...</div>;
+  if (error) return <div className="text-red-500">Error: {error.message}</div>;
 
   return (
     <div>
@@ -160,9 +147,7 @@ const CompanyPolicies = () => {
           </select>
         </div>
 
-        <button className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2">
-          Add Policy
-        </button>
+        <button onClick={() => openModal()} className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700">Add Policy</button>
       </div>
 
       <div className="overflow-hidden">
@@ -245,13 +230,8 @@ const CompanyPolicies = () => {
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap text-sm font-medium">
                     <div className="flex items-center space-x-2">
-                      <button className="text-purple-600 hover:text-purple-900">View</button>
-                      <button className="text-green-600 hover:text-green-900">Download</button>
-                      <button className="text-gray-400 hover:text-gray-600">
-                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-                        </svg>
-                      </button>
+                      <button onClick={() => openModal(policy)} className="text-purple-600 hover:text-purple-900">Edit</button>
+                      <button onClick={() => openDeleteModal(policy.id)} className="text-red-500 hover:text-red-700">Delete</button>
                     </div>
                   </td>
                 </tr>
@@ -260,6 +240,46 @@ const CompanyPolicies = () => {
           </tbody>
         </table>
       </div>
+
+      {/* Add/Edit Modal */}
+      {modalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+          <form onSubmit={handleSubmit} className="bg-white rounded-lg p-6 w-full max-w-md">
+            <h2 className="text-lg font-semibold mb-4">{editingId ? 'Edit' : 'Add'} Policy</h2>
+            <div className="space-y-3">
+              <input className="w-full px-3 py-2 border rounded" placeholder="Name" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} required />
+              <input className="w-full px-3 py-2 border rounded" placeholder="Category" value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))} />
+              <textarea className="w-full px-3 py-2 border rounded" placeholder="Description" value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} />
+              <input className="w-full px-3 py-2 border rounded" placeholder="Version" value={form.version} onChange={e => setForm(f => ({ ...f, version: e.target.value }))} />
+              <input className="w-full px-3 py-2 border rounded" type="date" value={form.last_updated} onChange={e => setForm(f => ({ ...f, last_updated: e.target.value }))} />
+              <input className="w-full px-3 py-2 border rounded" placeholder="Department" value={form.department} onChange={e => setForm(f => ({ ...f, department: e.target.value }))} />
+              <label className="flex items-center space-x-2">
+                <input type="checkbox" checked={form.required_reading} onChange={e => setForm(f => ({ ...f, required_reading: e.target.checked }))} />
+                <span>Required Reading</span>
+              </label>
+              <input className="w-full px-3 py-2 border rounded" type="file" accept=".pdf,.doc,.docx" onChange={handleFileChange} />
+              {form.file_url && <a href={form.file_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">View Current File</a>}
+            </div>
+            <div className="flex justify-end space-x-2 mt-4">
+              <button type="button" onClick={() => setModalOpen(false)} className="px-4 py-2 bg-gray-100 rounded">Cancel</button>
+              <button type="submit" disabled={saving} className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700">{saving ? 'Saving...' : 'Save'}</button>
+            </div>
+          </form>
+        </div>
+      )}
+      {/* Delete Modal */}
+      {deleteModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-sm">
+            <h2 className="text-lg font-semibold mb-4">Delete Policy</h2>
+            <p>Are you sure you want to delete this policy?</p>
+            <div className="flex justify-end space-x-2 mt-4">
+              <button type="button" onClick={() => setDeleteModalOpen(false)} className="px-4 py-2 bg-gray-100 rounded">Cancel</button>
+              <button type="button" onClick={handleDelete} disabled={saving} className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">{saving ? 'Deleting...' : 'Delete'}</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
