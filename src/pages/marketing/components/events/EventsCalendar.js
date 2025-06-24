@@ -1,14 +1,318 @@
-import React from 'react';
-import Card from '../../../../components/common/layout/Card';
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../../../contexts/AuthContext';
+import { getMarketingEvents, createMarketingEvent, updateMarketingEvent, deleteMarketingEvent } from '../../../../services/marketingService';
 
 const EventsCalendar = () => {
+  const { currentOrganization } = useAuth();
+  const [view, setView] = useState('list');
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [activities, setActivities] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [newActivity, setNewActivity] = useState({
+    title: '',
+    event_type: 'blog',
+    event_date: '',
+    description: ''
+  });
+
+  const activityTypes = [
+    { value: 'blog', label: 'Blog Post', color: 'bg-blue-100 text-blue-800' },
+    { value: 'press_release', label: 'Press Release', color: 'bg-green-100 text-green-800' },
+    { value: 'ad_campaign', label: 'Ad Campaign', color: 'bg-purple-100 text-purple-800' },
+    { value: 'newsletter', label: 'Newsletter', color: 'bg-orange-100 text-orange-800' }
+  ];
+
+  const statusColors = {
+    draft: 'bg-gray-100 text-gray-800',
+    scheduled: 'bg-yellow-100 text-yellow-800',
+    published: 'bg-green-100 text-green-800'
+  };
+
+  const filteredActivities = activities.filter(activity =>
+    activity.title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  useEffect(() => {
+    if (currentOrganization?.organization_id) {
+      loadActivities();
+    }
+  }, [currentOrganization]);
+
+  const loadActivities = async () => {
+    try {
+      setLoading(true);
+      const data = await getMarketingEvents(currentOrganization.organization_id);
+      setActivities(data);
+    } catch (error) {
+      console.error('Error loading activities:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAddActivity = async () => {
+    if (!newActivity.title || !newActivity.event_date) return;
+
+    try {
+      setSaving(true);
+      await createMarketingEvent(newActivity, currentOrganization.organization_id);
+      setShowAddModal(false);
+      setNewActivity({ title: '', event_type: 'blog', event_date: '', description: '' });
+      await loadActivities();
+    } catch (error) {
+      console.error('Error adding activity:', error);
+      alert('Failed to add activity. Please try again.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDeleteActivity = async (activityId) => {
+    if (!window.confirm('Are you sure you want to delete this activity?')) return;
+
+    try {
+      await deleteMarketingEvent(activityId);
+      await loadActivities();
+    } catch (error) {
+      console.error('Error deleting activity:', error);
+      alert('Failed to delete activity. Please try again.');
+    }
+  };
+
+  const formatFileSize = (bytes) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
   return (
-    <Card>
-      <div className="text-center py-12">
-        <h3 className="text-lg font-medium text-gray-900 mb-2">Events Calendar</h3>
-        <p className="text-gray-500">This feature is coming soon.</p>
+    <div>
+      <div>
+        <h1 className="text-xl font-semibold text-gray-900">Events Calendar</h1>
+        <p className="text-gray-600 text-sm mb-6">Plan and manage your marketing activities including blog posts, press releases, ad campaigns, and newsletters.</p>
       </div>
-    </Card>
+
+      {/* Tabs and Actions Bar */}
+      <div className="flex justify-between items-center mb-6">
+        <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
+          <button
+            onClick={() => setView('list')}
+            className={`flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+              view === 'list' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+            </svg>
+            List View
+          </button>
+          <button
+            onClick={() => setView('calendar')}
+            className={`flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+              view === 'calendar' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            Calendar View
+          </button>
+        </div>
+        <div className="flex items-center space-x-3">
+          <div className="relative w-64">
+            <svg className="absolute h-5 w-5 text-gray-400 left-3 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <input
+              type="text"
+              placeholder="Search activities..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
+          >
+            <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+            Add Activity
+          </button>
+        </div>
+      </div>
+
+      {view === 'list' ? (
+        <div className="bg-white shadow overflow-hidden">
+          {loading ? (
+            <div className="text-center py-10">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+              <p className="mt-2 text-gray-500">Loading activities...</p>
+            </div>
+          ) : (
+            <table className="min-w-full divide-y divide-gray-200 border border-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Activity
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Type
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Date
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {filteredActivities.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="py-16">
+                      <div className="flex flex-col items-center justify-center">
+                        <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mb-4">
+                          <svg className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                          </svg>
+                        </div>
+                        <p className="text-gray-500 text-sm">No marketing activities yet.</p>
+                      </div>
+                    </td>
+                  </tr>
+                ) : (
+                  filteredActivities.map((activity) => (
+                    <tr key={activity.id} className="hover:bg-gray-50">
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <div className="text-sm font-medium text-gray-900">{activity.title}</div>
+                        <div className="text-sm text-gray-500">{activity.description}</div>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${activityTypes.find(t => t.value === activity.event_type)?.color || 'bg-gray-100 text-gray-800'}`}>
+                          {activityTypes.find(t => t.value === activity.event_type)?.label || activity.event_type}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                        {new Date(activity.event_date).toLocaleDateString()}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColors[activity.status]}`}>
+                          {activity.status}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm font-medium">
+                        <button className="text-blue-600 hover:text-blue-900 mr-3">Edit</button>
+                        <button 
+                          onClick={() => handleDeleteActivity(activity.id)}
+                          className="text-red-600 hover:text-red-900"
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          )}
+        </div>
+      ) : (
+        <div className="bg-white shadow rounded-lg p-6">
+          <div className="text-center text-gray-500">
+            <p>Calendar view coming soon...</p>
+          </div>
+        </div>
+      )}
+
+      {/* Add Activity Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-medium text-gray-900">Add New Activity</h3>
+              <button
+                onClick={() => setShowAddModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Activity Title</label>
+                <input
+                  type="text"
+                  value={newActivity.title}
+                  onChange={(e) => setNewActivity({ ...newActivity, title: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Enter activity title"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Activity Type</label>
+                <select
+                  value={newActivity.event_type}
+                  onChange={(e) => setNewActivity({ ...newActivity, event_type: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  {activityTypes.map((type) => (
+                    <option key={type.value} value={type.value}>
+                      {type.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Date</label>
+                <input
+                  type="date"
+                  value={newActivity.event_date}
+                  onChange={(e) => setNewActivity({ ...newActivity, event_date: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Description (Optional)</label>
+                <textarea
+                  value={newActivity.description}
+                  onChange={(e) => setNewActivity({ ...newActivity, description: e.target.value })}
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Brief description of the activity"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end space-x-3 mt-6">
+              <button
+                onClick={() => setShowAddModal(false)}
+                disabled={saving}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleAddActivity}
+                disabled={saving}
+                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 disabled:opacity-50"
+              >
+                {saving ? 'Adding...' : 'Add Activity'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 

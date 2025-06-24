@@ -1,40 +1,129 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import Card from '../../../components/common/layout/Card';
 
+const colorPalette = [
+  'bg-blue-100 text-blue-700',
+  'bg-green-100 text-green-700',
+  'bg-pink-100 text-pink-700',
+  'bg-yellow-100 text-yellow-700',
+  'bg-purple-100 text-purple-700',
+  'bg-indigo-100 text-indigo-700',
+  'bg-red-100 text-red-700',
+];
+
+function getInitials(name) {
+  return name
+    .split(' ')
+    .map((n) => n[0])
+    .join('')
+    .toUpperCase();
+}
+
+const industries = ['Tech', 'Design', 'Legal', 'Finance', 'Marketing', 'Other'];
+
 const MyListing = () => {
+  const [photo, setPhoto] = useState(null);
+  const [name, setName] = useState('');
+  const [industry, setIndustry] = useState('');
+  const [services, setServices] = useState('');
+  const [description, setDescription] = useState('');
+  const fileInputRef = useRef();
+
+  const handlePhotoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (ev) => setPhoto(ev.target.result);
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handlePhotoClick = () => fileInputRef.current.click();
+
+  const colorIdx = name ? name.charCodeAt(0) % colorPalette.length : 0;
+
   return (
     <Card>
-      <div className="p-4">
-        <h2 className="text-xl font-bold mb-4">Set Up Your Listing</h2>
-        <form className="space-y-6">
-          <div>
-            <label htmlFor="company-name" className="block text-sm font-medium text-gray-700">Company Name</label>
-            <input type="text" id="company-name" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500" />
+      <form className="max-w-lg mx-auto p-8 flex flex-col items-center space-y-6">
+        <h2 className="text-xl font-bold">Your Marketplace Listing</h2>
+        {/* Photo/Initials */}
+        <div className="flex flex-col items-center">
+          <div className="mb-2">
+            {photo ? (
+              <img src={photo} alt="Logo" className="h-20 w-20 rounded-xl object-cover border border-gray-200" />
+            ) : (
+              <div className={`h-20 w-20 rounded-xl flex items-center justify-center font-bold text-2xl ${colorPalette[colorIdx]}`}>{name ? getInitials(name) : '?'}</div>
+            )}
           </div>
-          <div>
-            <label htmlFor="website" className="block text-sm font-medium text-gray-700">Website</label>
-            <input type="url" id="website" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Logo</label>
-            <div className="mt-1 flex items-center">
-              <span className="inline-block h-12 w-12 rounded-full overflow-hidden bg-gray-100">
-                <svg className="h-full w-full text-gray-300" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M24 20.993V24H0v-2.997A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
-              </span>
-              <button type="button" className="ml-5 rounded-md border border-gray-300 bg-white py-2 px-3 text-sm font-medium leading-4 text-gray-700 shadow-sm hover:bg-gray-50">Change</button>
+          <input
+            type="file"
+            accept="image/*"
+            ref={fileInputRef}
+            className="hidden"
+            onChange={handlePhotoChange}
+          />
+          <button type="button" onClick={handlePhotoClick} className="text-xs text-purple-700 hover:underline mt-1">{photo ? 'Change Photo' : 'Upload Photo'}</button>
+        </div>
+        {/* Name */}
+        <div className="w-full">
+          <label htmlFor="company-name" className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+          <input
+            type="text"
+            id="company-name"
+            value={name}
+            onChange={e => setName(e.target.value)}
+            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+            placeholder="Your company or personal name"
+          />
+        </div>
+        {/* Industry */}
+        <div className="w-full">
+          <label htmlFor="industry" className="block text-sm font-medium text-gray-700 mb-1">Industry</label>
+          <select
+            id="industry"
+            value={industry}
+            onChange={e => setIndustry(e.target.value)}
+            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+          >
+            <option value="">Select industry</option>
+            {industries.map((ind) => (
+              <option key={ind} value={ind}>{ind}</option>
+            ))}
+          </select>
+        </div>
+        {/* Services */}
+        <div className="w-full">
+          <label htmlFor="services" className="block text-sm font-medium text-gray-700 mb-1">Services (comma separated)</label>
+          <input
+            type="text"
+            id="services"
+            value={services}
+            onChange={e => setServices(e.target.value)}
+            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+            placeholder="e.g. Branding, Web Design, Consulting"
+          />
+          {services && (
+            <div className="flex flex-wrap gap-2 mt-2">
+              {services.split(',').map((s, i) => (
+                <span key={i} className="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-xs font-medium border border-purple-200">{s.trim()}</span>
+              ))}
             </div>
-          </div>
-          <div>
-            <label htmlFor="description" className="block text-sm font-medium text-gray-700">Description</label>
-            <textarea id="description" rows="3" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"></textarea>
-          </div>
-          <div className="flex justify-end">
-            <button type="submit" className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700">Save</button>
-          </div>
-        </form>
-      </div>
+          )}
+        </div>
+        {/* Description */}
+        <div className="w-full">
+          <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+          <textarea
+            id="description"
+            rows="3"
+            value={description}
+            onChange={e => setDescription(e.target.value)}
+            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+            placeholder="Describe your business, skills, or offering"
+          />
+        </div>
+        <button type="submit" className="w-full py-3 rounded-lg bg-purple-600 text-white font-semibold text-base shadow hover:bg-purple-700 transition-colors">Save Listing</button>
+      </form>
     </Card>
   );
 };

@@ -1,70 +1,36 @@
 import React from 'react';
+import Budget from './components/budget/Budget';
+import Overview from './components/Overview';
 
-const Finance = ({ activeSubTab, onSubTabChange }) => {
+const Finance = ({ activeSubTab }) => {
   const renderContent = () => {
     switch (activeSubTab) {
       case 'overview':
-        return (
-          <div className="space-y-6">
-            <h3 className="text-lg font-medium text-gray-900">Finance Overview</h3>
-            <p className="text-gray-600">Finance overview content coming soon.</p>
-          </div>
-        );
-      case 'balance-sheet':
-        return (
-          <div className="space-y-6">
-            <h3 className="text-lg font-medium text-gray-900">Balance Sheet</h3>
-            <p className="text-gray-600">Balance sheet content coming soon.</p>
-          </div>
-        );
-      case 'profit-loss':
-        return (
-          <div className="space-y-6">
-            <h3 className="text-lg font-medium text-gray-900">Profit & Loss</h3>
-            <p className="text-gray-600">Profit & loss content coming soon.</p>
-          </div>
-        );
-      case 'cashflow':
-        return (
-          <div className="space-y-6">
-            <h3 className="text-lg font-medium text-gray-900">Cash Flow</h3>
-            <p className="text-gray-600">Cash flow content coming soon.</p>
-          </div>
-        );
+        return <Overview />;
       case 'budget':
+        return <Budget />;
+      case 'invoicing':
         return (
           <div className="space-y-6">
-            <h3 className="text-lg font-medium text-gray-900">Budget</h3>
-            <p className="text-gray-600">Budget content coming soon.</p>
+            <h3 className="text-lg font-medium text-gray-900">Invoicing</h3>
+            <p className="text-gray-600">Invoicing content coming soon.</p>
           </div>
         );
-      case 'forecast':
+      case 'management':
         return (
           <div className="space-y-6">
-            <h3 className="text-lg font-medium text-gray-900">Forecast</h3>
-            <p className="text-gray-600">Forecast content coming soon.</p>
-          </div>
-        );
-      case 'invoices':
-        return (
-          <div className="space-y-6">
-            <h3 className="text-lg font-medium text-gray-900">Invoices</h3>
-            <p className="text-gray-600">Invoices content coming soon.</p>
+            <h3 className="text-lg font-medium text-gray-900">Management Accounts</h3>
+            <p className="text-gray-600">Management accounts content coming soon.</p>
           </div>
         );
       default:
-        return (
-          <div className="space-y-6">
-            <h3 className="text-lg font-medium text-gray-900">Finance Overview</h3>
-            <p className="text-gray-600">Finance overview content coming soon.</p>
-          </div>
-        );
+        return null;
     }
   };
 
   return (
     <div className="space-y-6">
-      <div className="mt-8">
+      <div>
         {renderContent()}
       </div>
     </div>

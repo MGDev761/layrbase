@@ -57,9 +57,9 @@ function AppContent() {
       finance: 'overview',
       legal: 'contracts',
       captable: 'overview',
-      marketing: 'overview',
+      marketing: 'events',
       sales: 'dashboard',
-      hr: 'overview',
+      hr: 'employees',
     };
     setActiveSubTab(defaultSubTabs[tabId] || null);
   };

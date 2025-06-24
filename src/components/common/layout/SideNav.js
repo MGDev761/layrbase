@@ -57,12 +57,9 @@ const SideNav = ({
     ],
     finance: [
       { id: 'overview', name: 'Overview' },
-      { id: 'balance-sheet', name: 'Balance Sheet' },
-      { id: 'profit-loss', name: 'Profit & Loss' },
-      { id: 'cashflow', name: 'Cash Flow' },
-      { id: 'budget', name: 'Budget' },
-      { id: 'forecast', name: 'Forecast' },
-      { id: 'invoices', name: 'Invoices' },
+      { id: 'budget', name: 'Budget & Forecast' },
+      { id: 'invoicing', name: 'Invoicing' },
+      { id: 'management', name: 'Management Accounts' },
     ],
     legal: [
       { id: 'contracts', name: 'Contracts' },
@@ -77,11 +74,9 @@ const SideNav = ({
       { id: 'investment', name: 'Investment Planning' },
     ],
     marketing: [
-      { id: 'overview', name: 'Overview' },
-      { id: 'campaigns', name: 'Campaigns' },
-      { id: 'analytics', name: 'Analytics' },
-      { id: 'content', name: 'Content' },
-      { id: 'events', name: 'Events' },
+      { id: 'events', name: 'Events Calendar' },
+      { id: 'brand', name: 'Brand Assets' },
+      { id: 'sales', name: 'Sales Collateral' },
     ],
     sales: [
       { id: 'dashboard', name: 'Sales Dashboard' },
@@ -90,16 +85,14 @@ const SideNav = ({
       { id: 'reports', name: 'Reports' },
     ],
     hr: [
-      { id: 'overview', name: 'Overview' },
       { id: 'employees', name: 'Employees' },
-      { id: 'recruitment', name: 'Recruitment' },
-      { id: 'performance', name: 'Performance' },
-      { id: 'time-tracking', name: 'Time Tracking' },
+      { id: 'time', name: 'Time Manager' },
+      { id: 'policies', name: 'Company Policies' },
     ],
   };
 
   return (
-    <div className="w-64 bg-white border-r border-gray-200 min-h-screen">
+    <div className="w-64 min-w-64 bg-white border-r border-gray-200 min-h-screen">
       <nav className="space-y-1 pt-4">
         {tabs.map((tab) => {
           const isExpanded = expandedSections.includes(tab.id);
