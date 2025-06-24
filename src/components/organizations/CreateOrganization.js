@@ -4,9 +4,16 @@ import logo from '../../assets/logopurple.png';
 import { supabase } from '../../lib/supabase';
 
 // Shared utility for org creation
-export async function createOrgDirect(name, slug, description, industry, website) {
+export async function createOrgDirect(name, description, industry, website) {
   const user = await supabase.auth.getUser();
   console.log('User in createOrgDirect:', user);
+  
+  // Auto-generate slug from name
+  const slug = name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '');
+    
   // 1. Insert organization
   const { data: org, error: orgError } = await supabase
     .from('organizations')
@@ -31,7 +38,6 @@ export async function createOrgDirect(name, slug, description, industry, website
 const CreateOrganization = ({ onSuccess, onCancel }) => {
   const [formData, setFormData] = useState({
     name: '',
-    slug: '',
     description: '',
     industry: '',
     website: ''
@@ -47,18 +53,6 @@ const CreateOrganization = ({ onSuccess, onCancel }) => {
       ...prev,
       [name]: value
     }));
-
-    // Auto-generate slug from name
-    if (name === 'name') {
-      const slug = value
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/(^-|-$)/g, '');
-      setFormData(prev => ({
-        ...prev,
-        slug
-      }));
-    }
   };
 
   const handleSubmit = async (e) => {
@@ -71,16 +65,10 @@ const CreateOrganization = ({ onSuccess, onCancel }) => {
       setLoading(false);
       return;
     }
-    if (!formData.slug.trim()) {
-      setError('Organization slug is required');
-      setLoading(false);
-      return;
-    }
 
     try {
       const { data, error, user } = await createOrgDirect(
-        formData.name, 
-        formData.slug,
+        formData.name,
         formData.description,
         formData.industry,
         formData.website
@@ -142,25 +130,6 @@ const CreateOrganization = ({ onSuccess, onCancel }) => {
                 className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 placeholder="Acme Corp"
               />
-            </div>
-            
-            <div>
-              <label htmlFor="slug" className="block text-sm font-medium text-gray-700">
-                Organization Slug *
-              </label>
-              <input
-                id="slug"
-                name="slug"
-                type="text"
-                required
-                value={formData.slug}
-                onChange={handleInputChange}
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                placeholder="acme-corp"
-              />
-              <p className="mt-1 text-xs text-gray-500">
-                This will be used in URLs and cannot be changed later
-              </p>
             </div>
             
             <div>

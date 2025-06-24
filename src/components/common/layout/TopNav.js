@@ -11,7 +11,6 @@ import {
   ComputerDesktopIcon
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../../../contexts/AuthContext';
-import OrganizationSwitcher from '../../organizations/OrganizationSwitcher';
 import logo from '../../../assets/logopurple2.png';
 
 const TopNav = ({ onTabChange, onCreateOrganization, onJoinOrganization }) => {
@@ -43,12 +42,6 @@ const TopNav = ({ onTabChange, onCreateOrganization, onJoinOrganization }) => {
 
           {/* Right side icons */}
           <div className="flex items-center space-x-3">
-            {/* Organization Switcher */}
-            <OrganizationSwitcher
-              onCreateOrganization={onCreateOrganization}
-              onJoinOrganization={onJoinOrganization}
-            />
-
             {/* Feedback Button */}
             <Popover className="relative">
               <Popover.Button className="px-2.5 py-1.5 text-gray-500 hover:text-gray-700 text-xs font-medium border border-gray-200 rounded-md">

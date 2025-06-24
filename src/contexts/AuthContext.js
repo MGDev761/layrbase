@@ -88,7 +88,30 @@ export const AuthProvider = ({ children }) => {
         }));
       }
 
-      return data || [];
+      // Add member count to each organization
+      const organizationsWithMemberCount = await Promise.all(
+        (data || []).map(async (org) => {
+          try {
+            const { count, error: countError } = await supabase
+              .from('user_organizations')
+              .select('*', { count: 'exact', head: true })
+              .eq('organization_id', org.organization_id)
+              .eq('is_active', true);
+
+            if (countError) {
+              console.error('Error getting member count for org:', org.organization_id, countError);
+              return { ...org, member_count: 0 };
+            }
+
+            return { ...org, member_count: count || 0 };
+          } catch (error) {
+            console.error('Error getting member count for org:', org.organization_id, error);
+            return { ...org, member_count: 0 };
+          }
+        })
+      );
+
+      return organizationsWithMemberCount;
     } catch (error) {
       console.error('Error fetching user organizations:', error);
       throw error;
