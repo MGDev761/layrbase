@@ -202,7 +202,7 @@ const EventsCalendar = () => {
           </div>
           <button
             onClick={() => setShowAddModal(true)}
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700"
           >
             <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -213,7 +213,7 @@ const EventsCalendar = () => {
       </div>
 
       {view === 'list' ? (
-        <div className="bg-white shadow overflow-hidden">
+        <div className="bg-white border border-gray-300 rounded-md overflow-hidden">
           {loading ? (
             <div className="text-center py-10">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
@@ -293,7 +293,7 @@ const EventsCalendar = () => {
       ) : (
         <div className="flex w-full gap-6">
           {/* Filter Panel */}
-          <div className="w-64 bg-white rounded-xl shadow border border-gray-100 p-4 h-fit self-start space-y-6">
+          <div className="w-64 bg-white rounded-md border border-gray-300 p-4 h-fit self-start space-y-6">
             <div>
               <div className="text-xs font-bold text-gray-500 uppercase mb-2">Search</div>
               <input
@@ -304,7 +304,7 @@ const EventsCalendar = () => {
                 onChange={e => setSearchTerm(e.target.value)}
               />
             </div>
-            <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+            <div className="bg-gray-50 border border-gray-200 rounded-md p-3">
               <div className="text-xs font-bold text-gray-500 uppercase mb-4">Event Type</div>
               <div className="space-y-3">
                 {eventTypes.map(type => (
@@ -331,7 +331,7 @@ const EventsCalendar = () => {
           </div>
           {/* Calendar */}
           <div className="flex-1">
-            <div className="bg-white rounded-xl shadow border border-gray-100 p-6 w-full max-w-4xl mx-auto">
+            <div className="bg-white rounded-md border border-gray-300 p-6 w-full max-w-4xl mx-auto">
               {/* Header */}
               <div className="flex items-center justify-between mb-4">
                 <button onClick={handlePrevMonth} className="p-2 rounded hover:bg-gray-100">
@@ -351,7 +351,7 @@ const EventsCalendar = () => {
                 ))}
               </div>
               {/* Calendar grid */}
-              <div className="grid grid-cols-7 gap-px bg-gray-200 rounded-lg overflow-hidden">
+              <div className="grid grid-cols-7 gap-px bg-gray-200 rounded-md overflow-hidden">
                 {monthMatrix.map((date, idx) => {
                   const isToday = date.isSame(today, 'day');
                   const isCurrentMonth = date.month() === currentMonth;

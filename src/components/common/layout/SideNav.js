@@ -140,7 +140,7 @@ const SideNav = ({
                     onClick={() => setCurrentOrganization(org)}
                     className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors flex items-center gap-2 ${
                       currentOrganization?.organization_id === org.organization_id
-                        ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                        ? 'bg-purple-50 text-purple-700 border border-purple-200'
                         : 'text-gray-700 hover:bg-gray-50'
                     }`}
                   >
@@ -152,7 +152,7 @@ const SideNav = ({
                       <div className="text-xs text-gray-500">{org.member_count || 0} Members</div>
                     </div>
                     {currentOrganization?.organization_id === org.organization_id && (
-                      <div className="ml-2 w-2 h-2 bg-blue-600 rounded-full"></div>
+                      <div className="ml-2 w-2 h-2 bg-purple-600 rounded-full"></div>
                     )}
                   </button>
                 ))}
@@ -190,7 +190,7 @@ const SideNav = ({
                 onClick={() => handleTabButtonClick(tab.id, hasSubsections)}
                 className={`w-full flex items-center justify-between px-4 py-3 text-left text-sm font-medium transition-colors ${
                   activeTab === tab.id
-                    ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-500'
+                    ? 'bg-purple-50 text-purple-700 border-r-2 border-purple-500'
                     : 'text-gray-700 hover:bg-gray-50'
                 }`}
               >
@@ -217,7 +217,7 @@ const SideNav = ({
                       onClick={() => handleSubTabClick(subsection.id)}
                       className={`w-full flex items-center px-8 py-2 text-left text-sm transition-colors ${
                         activeSubTab === subsection.id
-                          ? 'text-blue-700 bg-blue-50'
+                          ? 'text-purple-700 bg-purple-50'
                           : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                       }`}
                     >
@@ -238,7 +238,7 @@ const SideNav = ({
           onClick={() => onTabChange('marketplace')}
           className={`w-full flex items-center px-4 py-3 text-left text-sm font-medium transition-colors ${
             activeTab === 'marketplace'
-              ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-500'
+              ? 'bg-purple-50 text-purple-700 border-r-2 border-purple-500'
               : 'text-gray-700 hover:bg-gray-50'
           }`}
         >

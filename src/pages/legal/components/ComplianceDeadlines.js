@@ -152,7 +152,7 @@ const ComplianceDeadlines = () => {
         </div>
         <button
           onClick={() => setShowAddForm(!showAddForm)}
-          className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+          className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700"
         >
           <PlusIcon className="h-5 w-5 mr-2" />
           {showAddForm ? 'Cancel' : 'Add New Deadline'}

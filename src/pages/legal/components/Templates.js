@@ -112,7 +112,7 @@ const CustomizeModal = React.memo(({
             <button
               onClick={onSave}
               disabled={saving}
-              className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+              className="px-3 py-1.5 text-sm bg-purple-600 text-white rounded-md hover:bg-purple-700 disabled:opacity-50"
             >
               {saving ? 'Saving...' : 'Save to My Contracts'}
             </button>
@@ -288,7 +288,7 @@ const Templates = () => {
                         disabled={showCustomizeModal}
                         className={`w-full flex items-center p-3 text-left text-sm rounded-md transition-colors ${
                           selectedTemplate?.id === template.id
-                            ? 'bg-blue-100 text-blue-700'
+                            ? 'bg-purple-100 text-purple-700'
                             : 'text-gray-700 hover:bg-gray-100'
                         } ${showCustomizeModal ? 'opacity-50 cursor-not-allowed' : ''}`}
                       >
@@ -324,7 +324,7 @@ const Templates = () => {
                   </div>
                   <button 
                     onClick={handleCustomize}
-                    className="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition-colors ml-4"
+                    className="inline-flex items-center px-3 py-1.5 bg-purple-600 text-white text-sm font-medium rounded-md hover:bg-purple-700 transition-colors ml-4"
                   >
                     <PencilSquareIcon className="h-4 w-4 mr-1.5" />
                     Customise

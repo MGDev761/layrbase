@@ -146,7 +146,7 @@ const Dashboard = () => {
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-semibold text-gray-900">Notifications</h2>
         </div>
-        <div className="bg-white rounded-lg shadow p-0 h-[216px] overflow-hidden">
+        <div className="bg-white rounded-md flex flex-col h-[216px] overflow-hidden">
           <div className="divide-y divide-gray-100 max-h-full overflow-y-auto">
             {notifications.map((notification) => (
               <button
@@ -195,7 +195,7 @@ const Dashboard = () => {
 
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-lg p-6 w-96 max-w-md">
+        <div className="bg-white rounded-md p-6 w-96 max-w-md">
           <div className="flex items-start space-x-3 mb-4">
             <div className="flex-shrink-0 mt-1">
               {getIcon(selectedNotification.type)}
@@ -245,7 +245,7 @@ const Dashboard = () => {
           
           {/* Edit Dashboard Modal */}
           {showEditModal && (
-            <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-lg shadow-2xl border border-gray-300 z-50">
+            <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-md shadow-2xl border border-gray-300 z-50">
               <div className="p-4">
                 <h3 className="text-sm font-medium text-gray-900 mb-3">Dashboard Sections</h3>
                 <div className="space-y-2">
@@ -274,7 +274,7 @@ const Dashboard = () => {
       {/* Financial Overview - Full Width */}
       {dashboardSections.financial && (
         <div>
-          <div className="bg-white rounded-lg shadow flex flex-col border border-gray-300">
+          <div className="bg-white rounded-md flex flex-col border border-gray-300">
             {/* Top Bar */}
             <div className="flex items-center justify-between px-4 py-2 bg-gray-50 rounded-t-lg border-b border-gray-100">
               <h2 className="text-base font-semibold text-gray-900">Financial Overview</h2>
@@ -324,7 +324,7 @@ const Dashboard = () => {
         {/* Notifications */}
         {dashboardSections.notifications && (
           <div>
-            <div className="bg-white rounded-lg shadow flex flex-col h-[280px] border border-gray-300">
+            <div className="bg-white rounded-md flex flex-col h-[280px] border border-gray-300">
               {/* Top Bar */}
               <div className="flex items-center justify-between px-4 py-2 bg-gray-50 rounded-t-lg border-b border-gray-100">
                 <h2 className="text-base font-semibold text-gray-900">Notifications</h2>
@@ -392,7 +392,7 @@ const Dashboard = () => {
         {/* Sales Activities */}
         {dashboardSections.salesActivity && (
                 <div>
-            <div className="bg-white rounded-lg shadow flex flex-col h-[280px] border border-gray-300">
+            <div className="bg-white rounded-md flex flex-col h-[280px] border border-gray-300">
               {/* Top Bar */}
               <div className="flex items-center justify-between px-4 py-2 bg-gray-50 rounded-t-lg border-b border-gray-100">
                 <h2 className="text-base font-semibold text-gray-900">Sales Activities</h2>
@@ -412,28 +412,28 @@ const Dashboard = () => {
               {/* Content */}
               <div className="flex-1 p-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
                     <div className="flex items-center space-x-3">
                       <div className="w-3 h-3 bg-green-500 rounded-full"></div>
                       <span className="text-sm font-medium text-gray-900">New Leads</span>
                     </div>
                     <span className="text-lg font-bold text-gray-900">12</span>
                   </div>
-                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
                     <div className="flex items-center space-x-3">
                       <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
                       <span className="text-sm font-medium text-gray-900">Active Deals</span>
                     </div>
                     <span className="text-lg font-bold text-gray-900">8</span>
                   </div>
-                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
                     <div className="flex items-center space-x-3">
                       <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
                       <span className="text-sm font-medium text-gray-900">Pending Quotes</span>
                     </div>
                     <span className="text-lg font-bold text-gray-900">5</span>
                   </div>
-                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
                     <div className="flex items-center space-x-3">
                       <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
                       <span className="text-sm font-medium text-gray-900">This Month Revenue</span>
@@ -461,7 +461,7 @@ const Dashboard = () => {
         {/* Marketing Releases */}
         {dashboardSections.marketing && (
           <div>
-            <div className="bg-white rounded-lg shadow flex flex-col h-[280px] border border-gray-300">
+            <div className="bg-white rounded-md flex flex-col h-[280px] border border-gray-300">
               {/* Top Bar */}
               <div className="flex items-center justify-between px-4 py-2 bg-gray-50 rounded-t-lg border-b border-gray-100">
                 <h2 className="text-base font-semibold text-gray-900">Upcoming Marketing Releases</h2>
@@ -547,7 +547,7 @@ const Dashboard = () => {
         {/* Team Holidays */}
         {dashboardSections.holidays && (
         <div>
-            <div className="bg-white rounded-lg shadow flex flex-col h-[280px] border border-gray-300">
+            <div className="bg-white rounded-md flex flex-col h-[280px] border border-gray-300">
               {/* Top Bar */}
               <div className="flex items-center justify-between px-4 py-2 bg-gray-50 rounded-t-lg border-b border-gray-100">
                 <h2 className="text-base font-semibold text-gray-900">Team Holidays</h2>
@@ -610,7 +610,7 @@ const Dashboard = () => {
       {/* No dashboard components selected */}
       {Object.values(dashboardSections).every(v => !v) && (
         <div className="flex items-center justify-center min-h-[220px]">
-          <div className="bg-white rounded-lg shadow flex flex-col items-center justify-center w-full max-w-2xl mx-auto p-12 border border-gray-100">
+          <div className="bg-white rounded-md shadow flex flex-col items-center justify-center w-full max-w-2xl mx-auto p-12 border border-gray-100">
             <svg className="w-12 h-12 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2a4 4 0 018 0v2M9 17a4 4 0 01-8 0v-2a4 4 0 018 0v2zm0 0v2a4 4 0 008 0v-2m0 0a4 4 0 01-8 0" />
                 </svg>

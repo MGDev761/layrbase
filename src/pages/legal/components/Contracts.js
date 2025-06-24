@@ -21,7 +21,7 @@ const DropdownMenu = ({ contract, onEdit, onDelete, onDuplicate }) => {
     <div className="relative inline-block text-left" ref={menuRef}>
       <button
         onClick={e => { e.stopPropagation(); setIsOpen(!isOpen); }}
-        className="inline-flex items-center justify-center w-8 h-8 text-gray-500 rounded-full hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 hover:ring-2 hover:ring-blue-400"
+        className="inline-flex items-center justify-center w-8 h-8 text-gray-500 rounded-full hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 hover:ring-2 hover:ring-purple-400"
       >
         <EllipsisVerticalIcon className="w-5 h-5" />
       </button>
@@ -83,7 +83,7 @@ const MoveToFolderModal = ({ show, onClose, onSave, folders, saving }) => {
             <select
               value={selectedFolderId}
               onChange={(e) => setSelectedFolderId(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
             >
               <option value="">-- None (Remove from folder) --</option>
               {folders.map(folder => (
@@ -95,7 +95,7 @@ const MoveToFolderModal = ({ show, onClose, onSave, folders, saving }) => {
             <button type="button" onClick={onClose} className="px-4 py-2 text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200" disabled={saving}>
               Cancel
             </button>
-            <button type="button" onClick={handleSave} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50" disabled={saving}>
+            <button type="button" onClick={handleSave} className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 disabled:opacity-50" disabled={saving}>
               {saving ? 'Saving...' : 'Save'}
             </button>
           </div>
@@ -136,7 +136,7 @@ const UploadModal = ({ showModal, onClose, folders, onUpload, saving }) => {
               type="text"
               value={uploadData.name}
               onChange={(e) => setUploadData({ ...uploadData, name: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
               required
             />
           </div>
@@ -146,7 +146,7 @@ const UploadModal = ({ showModal, onClose, folders, onUpload, saving }) => {
               value={uploadData.description}
               onChange={(e) => setUploadData({ ...uploadData, description: e.target.value })}
               rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
             />
           </div>
           <div>
@@ -154,7 +154,7 @@ const UploadModal = ({ showModal, onClose, folders, onUpload, saving }) => {
             <select
               value={uploadData.folderId}
               onChange={(e) => setUploadData({ ...uploadData, folderId: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
             >
               <option value="">Select a folder</option>
               {folders.map(folder => (
@@ -168,7 +168,7 @@ const UploadModal = ({ showModal, onClose, folders, onUpload, saving }) => {
               type="file"
               accept=".pdf"
               onChange={handleFileChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
               required
             />
           </div>
@@ -184,7 +184,7 @@ const UploadModal = ({ showModal, onClose, folders, onUpload, saving }) => {
             <button
               type="submit"
               disabled={saving}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+              className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 disabled:opacity-50"
             >
               {saving ? 'Uploading...' : 'Upload Contract'}
             </button>
@@ -216,7 +216,8 @@ const FolderModal = ({ showModal, onClose, onCreate, saving }) => {
               type="text"
               value={newFolder.name}
               onChange={(e) => setNewFolder({ ...newFolder, name: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+              placeholder="Enter folder name"
               required
             />
           </div>
@@ -226,7 +227,8 @@ const FolderModal = ({ showModal, onClose, onCreate, saving }) => {
               value={newFolder.description}
               onChange={(e) => setNewFolder({ ...newFolder, description: e.target.value })}
               rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+              placeholder="Enter folder description (optional)"
             />
           </div>
           <div className="flex justify-end space-x-3">
@@ -241,7 +243,7 @@ const FolderModal = ({ showModal, onClose, onCreate, saving }) => {
             <button
               type="submit"
               disabled={saving}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+              className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 disabled:opacity-50"
             >
               {saving ? 'Creating...' : 'Create Folder'}
             </button>
@@ -456,13 +458,13 @@ const Contracts = () => {
           <h2 className="text-lg font-semibold mb-4">Folders</h2>
           <ul className="space-y-1">
             <li>
-              <a href="#" onClick={(e) => { e.preventDefault(); setSelectedFolder('all'); }} className={`block px-3 py-2 rounded-md text-sm font-medium ${selectedFolder === 'all' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'}`}>
+              <a href="#" onClick={(e) => { e.preventDefault(); setSelectedFolder('all'); }} className={`block px-3 py-2 rounded-md text-sm font-medium ${selectedFolder === 'all' ? 'bg-purple-100 text-purple-700' : 'text-gray-600 hover:bg-gray-100'}`}>
                 All Contracts
               </a>
             </li>
             {folders.map(folder => (
               <li key={folder.id}>
-                <a href="#" onClick={(e) => { e.preventDefault(); setSelectedFolder(folder.id); }} className={`flex items-center px-3 py-2 rounded-md text-sm font-medium ${selectedFolder === folder.id ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'}`}>
+                <a href="#" onClick={(e) => { e.preventDefault(); setSelectedFolder(folder.id); }} className={`flex items-center px-3 py-2 rounded-md text-sm font-medium ${selectedFolder === folder.id ? 'bg-purple-100 text-purple-700' : 'text-gray-600 hover:bg-gray-100'}`}>
                   <FolderIcon className="h-5 w-5 mr-2" />
                   {folder.name}
                 </a>
@@ -471,10 +473,10 @@ const Contracts = () => {
           </ul>
           <button 
             onClick={() => setShowFolderModal(true)} 
-            className="mt-4 w-full flex items-center justify-center px-4 py-2 border-2 border-dashed border-gray-300 rounded-md text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
           >
-            <PlusIcon className="h-5 w-5 mr-2" />
-            New Folder
+            <PlusIcon className="w-4 h-4 mr-1.5" />
+            Create Folder
           </button>
         </div>
 
@@ -490,8 +492,11 @@ const Contracts = () => {
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md"
               />
             </div>
-            <button onClick={() => setShowUploadModal(true)} className="flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
-              <ArrowUpTrayIcon className="h-5 w-5 mr-2" />
+            <button
+              onClick={() => setShowUploadModal(true)}
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700"
+            >
+              <ArrowUpTrayIcon className="w-4 h-4 mr-2" />
               Upload Contract
             </button>
           </div>
