@@ -106,6 +106,7 @@ export const AuthProvider = ({ children }) => {
             first_name: firstName,
             last_name: lastName,
           },
+          emailRedirectTo: 'https://layrbase.vercel.app/auth/callback'
         },
       });
 
@@ -169,82 +170,28 @@ export const AuthProvider = ({ children }) => {
   // Create organization
   const createOrganization = async (organizationData) => {
     try {
-      console.log('Creating organization with data:', organizationData);
-      
-      // Use the database function to create organization and add user as owner
-      const rpcPromise = supabase.rpc('create_organization_with_owner', {
-        org_name: organizationData.name,
-        org_slug: organizationData.slug,
-        org_description: organizationData.description,
-        org_industry: organizationData.industry,
-        org_website: organizationData.website
-      });
-      
-      const { data, error } = await withTimeout(rpcPromise, 8000);
+      // Log the current user/session for debugging RLS
+      const currentUser = await supabase.auth.getUser();
+      console.log('Current Supabase user before org creation:', currentUser);
 
-      console.log('RPC call result:', { data, error });
-
-      if (error) {
-        console.error('Database error creating organization:', error);
-        
-        if (error.message.includes('function') || error.message.includes('does not exist') || error.message.includes('timed out')) {
-          console.log('RPC function failed or timed out, trying manual approach...');
-          return await createOrganizationManual(organizationData);
-        }
-        
-        throw error;
-      }
-
-      console.log('Organization created successfully:', data);
-
-      // Refresh organizations
-      const userOrgs = await getUserOrganizations();
-      setOrganizations(userOrgs);
-      
-      // Set the new organization as current
-      if (data && data.length > 0) {
-        const newOrg = data[0];
-        setCurrentOrganization({
-          organization_id: newOrg.organization_id,
-          organization_name: newOrg.organization_name,
-          organization_slug: newOrg.organization_slug,
-          role: newOrg.role
-        });
-      }
-
-      return { data: data?.[0] || null, error: null };
-    } catch (error) {
-      console.error('Error creating organization:', error);
-      return { data: null, error };
-    }
-  };
-
-  // Manual organization creation fallback
-  const createOrganizationManual = async (organizationData) => {
-    try {
-      console.log('Creating organization manually...');
-      
-      // Create organization
+      // 1. Insert organization (only name and slug, like the test button)
       const { data: org, error: orgError } = await supabase
         .from('organizations')
         .insert([{
           name: organizationData.name,
-          slug: organizationData.slug,
-          description: organizationData.description,
-          industry: organizationData.industry,
-          website: organizationData.website
+          slug: organizationData.slug
         }])
         .select()
         .single();
 
       console.log('Organization insert result:', { org, orgError });
-
       if (orgError) {
         console.error('Error inserting organization:', orgError);
-        throw orgError;
+        return { data: null, error: orgError };
       }
 
-      // Add user as owner
+      // 2. Insert user_organizations
+      const user = currentUser.data.user;
       const { error: userOrgError } = await supabase
         .from('user_organizations')
         .insert([{
@@ -254,16 +201,14 @@ export const AuthProvider = ({ children }) => {
         }]);
 
       console.log('User organization insert result:', { userOrgError });
-
       if (userOrgError) {
         console.error('Error inserting user organization:', userOrgError);
-        throw userOrgError;
+        return { data: null, error: userOrgError };
       }
 
       // Refresh organizations
       const userOrgs = await getUserOrganizations();
       setOrganizations(userOrgs);
-      
       // Set the new organization as current
       setCurrentOrganization({
         organization_id: org.id,

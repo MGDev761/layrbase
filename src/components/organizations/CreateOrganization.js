@@ -1,6 +1,32 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import logo from '../../assets/logopurple.png';
+import { supabase } from '../../lib/supabase';
+
+// Shared utility for org creation
+export async function createOrgDirect(name, slug, description, industry, website) {
+  const user = await supabase.auth.getUser();
+  console.log('User in createOrgDirect:', user);
+  // 1. Insert organization
+  const { data: org, error: orgError } = await supabase
+    .from('organizations')
+    .insert([{ 
+      name, 
+      slug,
+      description,
+      industry,
+      website
+    }])
+    .select()
+    .single();
+  if (orgError) return { data: null, error: orgError, user };
+  // 2. Insert user_organizations
+  const { error: userOrgError } = await supabase
+    .from('user_organizations')
+    .insert([{ user_id: user.data.user.id, organization_id: org.id, role: 'owner' }]);
+  if (userOrgError) return { data: null, error: userOrgError, user };
+  return { data: org, error: null, user };
+}
 
 const CreateOrganization = ({ onSuccess, onCancel }) => {
   const [formData, setFormData] = useState({
@@ -13,7 +39,7 @@ const CreateOrganization = ({ onSuccess, onCancel }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   
-  const { createOrganization } = useAuth();
+  const { createOrganization, refreshOrganizations } = useAuth();
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -45,7 +71,6 @@ const CreateOrganization = ({ onSuccess, onCancel }) => {
       setLoading(false);
       return;
     }
-
     if (!formData.slug.trim()) {
       setError('Organization slug is required');
       setLoading(false);
@@ -53,20 +78,21 @@ const CreateOrganization = ({ onSuccess, onCancel }) => {
     }
 
     try {
-      console.log('Creating organization with data:', formData);
-      const { data, error } = await createOrganization(formData);
-      
+      const { data, error, user } = await createOrgDirect(
+        formData.name, 
+        formData.slug,
+        formData.description,
+        formData.industry,
+        formData.website
+      );
       console.log('Create organization result:', { data, error });
-      
       if (error) {
-        console.error('Organization creation error:', error);
         setError(error.message || 'Failed to create organization');
       } else {
-        console.log('Organization created successfully:', data);
+        await refreshOrganizations();
         onSuccess(data);
       }
     } catch (err) {
-      console.error('Unexpected error creating organization:', err);
       setError('An unexpected error occurred');
     } finally {
       setLoading(false);

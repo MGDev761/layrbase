@@ -7,7 +7,7 @@ const JoinOrganization = ({ onSuccess, onCancel }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   
-  const { joinOrganization } = useAuth();
+  const { joinOrganization, refreshOrganizations } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -26,6 +26,7 @@ const JoinOrganization = ({ onSuccess, onCancel }) => {
       if (error) {
         setError(error.message);
       } else {
+        await refreshOrganizations();
         onSuccess(data);
       }
     } catch (err) {
