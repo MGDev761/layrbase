@@ -6,7 +6,18 @@ import { supabase } from '../../../../lib/supabase';
 
 const CompanyDetails = () => {
   const { currentOrganization } = useAuth();
-  const [isEditing, setIsEditing] = useState(false);
+  // Section edit states
+  const [isEditingBasic, setIsEditingBasic] = useState(false);
+  const [isEditingContact, setIsEditingContact] = useState(false);
+  const [isEditingBank, setIsEditingBank] = useState(false);
+  // Section error states
+  const [saveErrorBasic, setSaveErrorBasic] = useState('');
+  const [saveErrorContact, setSaveErrorContact] = useState('');
+  const [saveErrorBank, setSaveErrorBank] = useState('');
+  // Section form states
+  const [basicForm, setBasicForm] = useState({ name: '', companyNumber: '', incorporationDate: '' });
+  const [contactForm, setContactForm] = useState({ registeredOffice: '', website: '', contactEmail: '', linkedinProfile: '', vatNumber: '' });
+  const [bankForm, setBankForm] = useState({ bankProvider: '', bankAccountOpened: '' });
   const [companyInfo, setCompanyInfo] = useState({
     name: '',
     companyNumber: '',
@@ -19,7 +30,6 @@ const CompanyDetails = () => {
     bankProvider: '',
     bankAccountOpened: ''
   });
-  const [editForm, setEditForm] = useState(companyInfo);
   const [logoUrl, setLogoUrl] = useState('');
   const fileInputRef = useRef();
 
@@ -40,15 +50,19 @@ const CompanyDetails = () => {
           bankProvider: data.bank_provider || '',
           bankAccountOpened: data.bank_account_opened || ''
         });
-        setEditForm({
+        setBasicForm({
           name: data.name || '',
           companyNumber: data.company_number || '',
-          incorporationDate: data.incorporation_date || '',
+          incorporationDate: data.incorporation_date || ''
+        });
+        setContactForm({
           registeredOffice: data.registered_office || '',
           website: data.website || '',
           contactEmail: data.contact_email || '',
           linkedinProfile: data.linkedin_profile || '',
-          vatNumber: data.vat_number || '',
+          vatNumber: data.vat_number || ''
+        });
+        setBankForm({
           bankProvider: data.bank_provider || '',
           bankAccountOpened: data.bank_account_opened || ''
         });
@@ -58,33 +72,60 @@ const CompanyDetails = () => {
     fetchProfile();
   }, [currentOrganization]);
 
-  const handleSave = async () => {
+  // Basic Info Save
+  const handleSaveBasic = async () => {
+    setSaveErrorBasic('');
     if (!currentOrganization?.organization_id) return;
     const profile = {
       organization_id: currentOrganization.organization_id,
-      name: editForm.name,
-      company_number: editForm.companyNumber,
-      incorporation_date: editForm.incorporationDate,
-      registered_office: editForm.registeredOffice,
-      website: editForm.website,
-      contact_email: editForm.contactEmail,
-      linkedin_profile: editForm.linkedinProfile,
-      vat_number: editForm.vatNumber,
-      bank_provider: editForm.bankProvider,
-      bank_account_opened: editForm.bankAccountOpened
+      name: basicForm.name,
+      company_number: basicForm.companyNumber,
+      incorporation_date: basicForm.incorporationDate
     };
-    await upsertCompanyProfile(profile);
-    setCompanyInfo(editForm);
-    setIsEditing(false);
+    try {
+      await upsertCompanyProfile(profile);
+      setCompanyInfo(prev => ({ ...prev, ...basicForm }));
+      setIsEditingBasic(false);
+    } catch (err) {
+      setSaveErrorBasic(err.message || 'Failed to save.');
+    }
   };
-
-  const handleCancel = () => {
-    setEditForm(companyInfo);
-    setIsEditing(false);
+  // Contact Save
+  const handleSaveContact = async () => {
+    setSaveErrorContact('');
+    if (!currentOrganization?.organization_id) return;
+    const profile = {
+      organization_id: currentOrganization.organization_id,
+      registered_office: contactForm.registeredOffice,
+      website: contactForm.website,
+      contact_email: contactForm.contactEmail,
+      linkedin_profile: contactForm.linkedinProfile,
+      vat_number: contactForm.vatNumber
+    };
+    try {
+      await upsertCompanyProfile(profile);
+      setCompanyInfo(prev => ({ ...prev, ...contactForm }));
+      setIsEditingContact(false);
+    } catch (err) {
+      setSaveErrorContact(err.message || 'Failed to save.');
+    }
   };
-
-  const handleInputChange = (field, value) => {
-    setEditForm(prev => ({ ...prev, [field]: value }));
+  // Bank Save
+  const handleSaveBank = async () => {
+    setSaveErrorBank('');
+    if (!currentOrganization?.organization_id) return;
+    const profile = {
+      organization_id: currentOrganization.organization_id,
+      bank_provider: bankForm.bankProvider,
+      bank_account_opened: bankForm.bankAccountOpened
+    };
+    try {
+      await upsertCompanyProfile(profile);
+      setCompanyInfo(prev => ({ ...prev, ...bankForm }));
+      setIsEditingBank(false);
+    } catch (err) {
+      setSaveErrorBank(err.message || 'Failed to save.');
+    }
   };
 
   const handleLogoUpload = async (e) => {
@@ -172,28 +213,28 @@ const CompanyDetails = () => {
                     <ClipboardIcon className="h-4 w-4 mr-1" /> Copy
                   </button>
                   <button
-                    onClick={() => setIsEditing(!isEditing)}
+                    onClick={() => isEditingBasic ? handleSaveBasic() : setIsEditingBasic(true)}
                     className="inline-flex items-center text-xs text-blue-600 border border-blue-600 bg-white rounded-md px-3 py-1.5 hover:bg-blue-50 hover:border-blue-700 hover:text-blue-700"
                     style={{ boxShadow: 'none' }}
-            >
-              {isEditing ? (
-                <>
+                  >
+                    {isEditingBasic ? (
+                      <>
                         <CheckIcon className="h-4 w-4 mr-1" /> Save
-                </>
-              ) : (
-                <>
+                      </>
+                    ) : (
+                      <>
                         <PencilIcon className="h-4 w-4 mr-1" /> Edit
-                </>
-              )}
-            </button>
-          </div>
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
               <div className="px-6 pb-6 pt-0 space-y-4">
                 {/* Field: Company Name */}
                 <div className="flex items-center gap-4">
                   <label className="block w-40 text-xs font-medium text-gray-500">Company Name</label>
-                  {isEditing ? (
-                    <input type="text" value={editForm.name} onChange={e => handleInputChange('name', e.target.value)} className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
+                  {isEditingBasic ? (
+                    <input type="text" value={basicForm.name} onChange={e => setBasicForm(f => ({ ...f, name: e.target.value }))} className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
                   ) : (
                     <div className="flex-1 text-gray-900 text-sm">{companyInfo.name}</div>
                   )}
@@ -201,8 +242,8 @@ const CompanyDetails = () => {
                 {/* Field: Company Number */}
                 <div className="flex items-center gap-4">
                   <label className="block w-40 text-xs font-bold text-gray-500">Company Number</label>
-                  {isEditing ? (
-                    <input type="text" value={editForm.companyNumber} onChange={e => handleInputChange('companyNumber', e.target.value)} className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
+                  {isEditingBasic ? (
+                    <input type="text" value={basicForm.companyNumber} onChange={e => setBasicForm(f => ({ ...f, companyNumber: e.target.value }))} className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
                   ) : (
                     <div className="flex-1 text-gray-900 text-sm">{companyInfo.companyNumber}</div>
                   )}
@@ -210,8 +251,8 @@ const CompanyDetails = () => {
                 {/* Field: Incorporation Date */}
                 <div className="flex items-center gap-4">
                   <label className="block w-40 text-xs font-medium text-gray-500">Incorporation Date</label>
-                  {isEditing ? (
-                    <input type="date" value={editForm.incorporationDate} onChange={e => handleInputChange('incorporationDate', e.target.value)} className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
+                  {isEditingBasic ? (
+                    <input type="date" value={basicForm.incorporationDate} onChange={e => setBasicForm(f => ({ ...f, incorporationDate: e.target.value }))} className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
                   ) : (
                     <div className="flex-1 text-gray-900 text-sm">{companyInfo.incorporationDate}</div>
                   )}
@@ -234,11 +275,11 @@ const CompanyDetails = () => {
                   <ClipboardIcon className="h-4 w-4 mr-1" /> Copy
                 </button>
                 <button
-                  onClick={() => setIsEditing(!isEditing)}
+                  onClick={() => isEditingContact ? handleSaveContact() : setIsEditingContact(true)}
                   className="inline-flex items-center text-xs text-blue-600 border border-blue-600 bg-white rounded-md px-3 py-1.5 hover:bg-blue-50 hover:border-blue-700 hover:text-blue-700"
                   style={{ boxShadow: 'none' }}
                 >
-          {isEditing ? (
+                  {isEditingContact ? (
                     <>
                       <CheckIcon className="h-4 w-4 mr-1" /> Save
                     </>
@@ -254,8 +295,8 @@ const CompanyDetails = () => {
               {/* Field: Registered Office */}
               <div className="flex items-center gap-4">
                 <label className="block w-40 text-xs font-medium text-gray-500">Registered Office</label>
-                {isEditing ? (
-                  <textarea value={editForm.registeredOffice} onChange={e => handleInputChange('registeredOffice', e.target.value)} rows={2} className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
+                {isEditingContact ? (
+                  <textarea value={contactForm.registeredOffice} onChange={e => setContactForm(f => ({ ...f, registeredOffice: e.target.value }))} rows={2} className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
                 ) : (
                   <div className="flex-1 text-gray-900 text-sm">{companyInfo.registeredOffice}</div>
                 )}
@@ -263,8 +304,8 @@ const CompanyDetails = () => {
               {/* Field: Website */}
               <div className="flex items-center gap-4">
                 <label className="block w-40 text-xs font-medium text-gray-500">Website</label>
-                {isEditing ? (
-                  <input type="url" value={editForm.website} onChange={e => handleInputChange('website', e.target.value)} className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
+                {isEditingContact ? (
+                  <input type="url" value={contactForm.website} onChange={e => setContactForm(f => ({ ...f, website: e.target.value }))} className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
                 ) : (
                   <div className="flex-1 text-gray-900 text-sm">{companyInfo.website}</div>
                 )}
@@ -272,8 +313,8 @@ const CompanyDetails = () => {
               {/* Field: Contact Email */}
               <div className="flex items-center gap-4">
                 <label className="block w-40 text-xs font-medium text-gray-500">Contact Email</label>
-                {isEditing ? (
-                  <input type="email" value={editForm.contactEmail} onChange={e => handleInputChange('contactEmail', e.target.value)} className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
+                {isEditingContact ? (
+                  <input type="email" value={contactForm.contactEmail} onChange={e => setContactForm(f => ({ ...f, contactEmail: e.target.value }))} className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
                 ) : (
                   <div className="flex-1 text-gray-900 text-sm">{companyInfo.contactEmail}</div>
                 )}
@@ -281,8 +322,8 @@ const CompanyDetails = () => {
               {/* Field: LinkedIn Profile */}
               <div className="flex items-center gap-4">
                 <label className="block w-40 text-xs font-medium text-gray-500">LinkedIn Profile</label>
-                {isEditing ? (
-                  <input type="url" value={editForm.linkedinProfile} onChange={e => handleInputChange('linkedinProfile', e.target.value)} className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
+                {isEditingContact ? (
+                  <input type="url" value={contactForm.linkedinProfile} onChange={e => setContactForm(f => ({ ...f, linkedinProfile: e.target.value }))} className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
                 ) : (
                   <div className="flex-1 text-gray-900 text-sm">{companyInfo.linkedinProfile}</div>
                 )}
@@ -290,8 +331,8 @@ const CompanyDetails = () => {
               {/* Field: VAT Number */}
               <div className="flex items-center gap-4">
                 <label className="block w-40 text-xs font-medium text-gray-500">VAT Number</label>
-                {isEditing ? (
-                  <input type="text" value={editForm.vatNumber} onChange={e => handleInputChange('vatNumber', e.target.value)} className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
+                {isEditingContact ? (
+                  <input type="text" value={contactForm.vatNumber} onChange={e => setContactForm(f => ({ ...f, vatNumber: e.target.value }))} className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
                 ) : (
                   <div className="flex-1 text-gray-900 text-sm">{companyInfo.vatNumber}</div>
                 )}
@@ -313,11 +354,11 @@ const CompanyDetails = () => {
                   <ClipboardIcon className="h-4 w-4 mr-1" /> Copy
                 </button>
                 <button
-                  onClick={() => setIsEditing(!isEditing)}
+                  onClick={() => isEditingBank ? handleSaveBank() : setIsEditingBank(true)}
                   className="inline-flex items-center text-xs text-blue-600 border border-blue-600 bg-white rounded-md px-3 py-1.5 hover:bg-blue-50 hover:border-blue-700 hover:text-blue-700"
                   style={{ boxShadow: 'none' }}
                 >
-                  {isEditing ? (
+                  {isEditingBank ? (
                     <>
                       <CheckIcon className="h-4 w-4 mr-1" /> Save
                     </>
@@ -333,8 +374,8 @@ const CompanyDetails = () => {
               {/* Field: Bank Provider */}
               <div className="flex items-center gap-4">
                 <label className="block w-40 text-xs font-medium text-gray-500">Bank Provider</label>
-                {isEditing ? (
-                  <input type="text" value={editForm.bankProvider} onChange={e => handleInputChange('bankProvider', e.target.value)} className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
+                {isEditingBank ? (
+                  <input type="text" value={bankForm.bankProvider} onChange={e => setBankForm(f => ({ ...f, bankProvider: e.target.value }))} className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
                 ) : (
                   <div className="flex-1 text-gray-900 text-sm">{companyInfo.bankProvider}</div>
                 )}
@@ -342,8 +383,8 @@ const CompanyDetails = () => {
               {/* Field: Bank Account Opened */}
               <div className="flex items-center gap-4">
                 <label className="block w-40 text-xs font-medium text-gray-500">Bank Account Opened</label>
-                {isEditing ? (
-                  <input type="date" value={editForm.bankAccountOpened} onChange={e => handleInputChange('bankAccountOpened', e.target.value)} className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
+                {isEditingBank ? (
+                  <input type="date" value={bankForm.bankAccountOpened} onChange={e => setBankForm(f => ({ ...f, bankAccountOpened: e.target.value }))} className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
                 ) : (
                   <div className="flex-1 text-gray-900 text-sm">{companyInfo.bankAccountOpened}</div>
                 )}
@@ -351,22 +392,6 @@ const CompanyDetails = () => {
             </div>
           </div>
         </div>
-        {isEditing && (
-          <div className="flex justify-end space-x-2 pt-4">
-                <button
-                  onClick={handleCancel}
-                  className="px-4 py-2 text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleSave}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                >
-                  Save Changes
-                </button>
-            </div>
-          )}
       </div>
     </div>
   );

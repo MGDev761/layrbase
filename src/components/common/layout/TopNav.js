@@ -116,7 +116,7 @@ const TopNav = ({ onTabChange, onCreateOrganization, onJoinOrganization }) => {
                   </div>
                   
                   <div className="border-t border-gray-200 my-1"></div>
-
+                  
                   <div className="space-y-1 py-1">
                     <button className="block w-full text-left px-2 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md"
                       onClick={() => onTabChange('myorgs')}
@@ -124,7 +124,7 @@ const TopNav = ({ onTabChange, onCreateOrganization, onJoinOrganization }) => {
                       My Organizations
                     </button>
                   </div>
-                  
+
                   <div className="border-t border-gray-200 my-1"></div>
 
                   <div className="space-y-1 py-1">
