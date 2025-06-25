@@ -244,8 +244,11 @@ const TimeManager = () => {
       {/* Add/Edit Modal */}
       {modalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-          <form onSubmit={handleSubmit} className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h2 className="text-lg font-semibold mb-4">{editingId ? 'Edit' : 'Add'} Holiday Request</h2>
+          <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-lg border border-gray-100">
+            <div className="flex items-center justify-between mb-6 border-b border-gray-100 pb-4">
+              <div className="text-lg font-medium text-gray-900">{editingId ? 'Edit' : 'Add'} Holiday Request</div>
+              <button type="button" onClick={() => setModalOpen(false)} className="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
+            </div>
             <div className="space-y-3">
               <select className="w-full px-3 py-2 border rounded" value={form.employee_id} onChange={e => setForm(f => ({ ...f, employee_id: Number(e.target.value) }))} required>
                 <option value="">Select Employee</option>
@@ -263,9 +266,9 @@ const TimeManager = () => {
                 <option value="rejected">Rejected</option>
               </select>
             </div>
-            <div className="flex justify-end space-x-2 mt-4">
-              <button type="button" onClick={() => setModalOpen(false)} className="px-4 py-2 bg-gray-100 rounded">Cancel</button>
-              <button type="submit" disabled={saving} className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700">{saving ? 'Saving...' : 'Save'}</button>
+            <div className="flex justify-end space-x-2 mt-8">
+              <button type="button" onClick={() => setModalOpen(false)} className="px-3 py-2 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200">Cancel</button>
+              <button type="submit" disabled={saving} className="px-4 py-2 bg-purple-600 text-white rounded shadow hover:bg-purple-700">{saving ? 'Saving...' : 'Save'}</button>
             </div>
           </form>
         </div>
@@ -274,12 +277,15 @@ const TimeManager = () => {
       {/* Delete Modal */}
       {deleteModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-sm">
-            <h2 className="text-lg font-semibold mb-4">Delete Holiday Request</h2>
+          <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-6 border-b border-gray-100 pb-4">
+              <div className="text-lg font-medium text-gray-900">Delete Holiday Request</div>
+              <button type="button" onClick={() => setDeleteModalOpen(false)} className="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
+            </div>
             <p>Are you sure you want to delete this request?</p>
-            <div className="flex justify-end space-x-2 mt-4">
-              <button type="button" onClick={() => setDeleteModalOpen(false)} className="px-4 py-2 bg-gray-100 rounded">Cancel</button>
-              <button type="button" onClick={handleDelete} disabled={saving} className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">{saving ? 'Deleting...' : 'Delete'}</button>
+            <div className="flex justify-end space-x-2 mt-8">
+              <button type="button" onClick={() => setDeleteModalOpen(false)} className="px-3 py-2 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200">Cancel</button>
+              <button type="button" onClick={handleDelete} disabled={saving} className="px-4 py-2 bg-red-600 text-white rounded shadow hover:bg-red-700">{saving ? 'Deleting...' : 'Delete'}</button>
             </div>
           </div>
         </div>

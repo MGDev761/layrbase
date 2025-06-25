@@ -152,7 +152,7 @@ const ComplianceDeadlines = () => {
         </div>
         <button
           onClick={() => setShowAddForm(!showAddForm)}
-          className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700"
+          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700"
         >
           <PlusIcon className="h-5 w-5 mr-2" />
           {showAddForm ? 'Cancel' : 'Add New Deadline'}
@@ -160,71 +160,87 @@ const ComplianceDeadlines = () => {
       </div>
 
       {showAddForm && (
-        <div className="bg-white p-6 rounded-lg shadow border border-gray-200">
-          <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">Add New Compliance Deadline</h3>
-          <form onSubmit={handleAddDeadline} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="deadlineName" className="block text-sm font-medium text-gray-700">Deadline Name *</label>
-                <input
-                  type="text"
-                  id="deadlineName"
-                  value={newDeadline.name}
-                  onChange={(e) => setNewDeadline({ ...newDeadline, name: e.target.value })}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  required
-                />
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black bg-opacity-50" onClick={() => setShowAddForm(false)} />
+          <div className="relative max-w-xl w-full bg-white rounded-xl shadow-2xl flex flex-col">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gray-50 rounded-t-xl">
+              <h3 className="text-lg font-medium text-gray-900">Add New Compliance Deadline</h3>
+              <button onClick={() => setShowAddForm(false)} className="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+            </div>
+            <form onSubmit={handleAddDeadline} className="flex-1 flex flex-col justify-center">
+              <div className="flex-1 px-6 py-8 flex flex-col justify-center">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                  <div>
+                    <label htmlFor="deadlineName" className="block text-sm font-medium text-gray-700">Deadline Name *</label>
+                    <input
+                      type="text"
+                      id="deadlineName"
+                      value={newDeadline.name}
+                      onChange={(e) => setNewDeadline({ ...newDeadline, name: e.target.value })}
+                      className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="deadlineCategory" className="block text-sm font-medium text-gray-700">Category</label>
+                    <select
+                      id="deadlineCategory"
+                      value={newDeadline.category}
+                      onChange={(e) => setNewDeadline({ ...newDeadline, category: e.target.value })}
+                      className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm"
+                    >
+                      <option value="">Select category</option>
+                      <option value="annual_filing">Annual Filing</option>
+                      <option value="tax_return">Tax Return</option>
+                      <option value="regulatory">Regulatory</option>
+                      <option value="contract_renewal">Contract Renewal</option>
+                      <option value="insurance">Insurance</option>
+                      <option value="general">General</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="mb-6">
+                  <label htmlFor="dueDate" className="block text-sm font-medium text-gray-700">Due Date *</label>
+                  <input
+                    type="date"
+                    id="dueDate"
+                    value={newDeadline.dueDate}
+                    onChange={(e) => setNewDeadline({ ...newDeadline, dueDate: e.target.value })}
+                    className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm"
+                    required
+                  />
+                </div>
+                <div className="mb-6">
+                  <label htmlFor="description" className="block text-sm font-medium text-gray-700">Description</label>
+                  <textarea
+                    id="description"
+                    value={newDeadline.description}
+                    onChange={(e) => setNewDeadline({ ...newDeadline, description: e.target.value })}
+                    rows={3}
+                    className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm"
+                    placeholder="Add any additional details about this deadline..."
+                  />
+                </div>
               </div>
-              <div>
-                <label htmlFor="deadlineCategory" className="block text-sm font-medium text-gray-700">Category</label>
-                <select
-                  id="deadlineCategory"
-                  value={newDeadline.category}
-                  onChange={(e) => setNewDeadline({ ...newDeadline, category: e.target.value })}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              <div className="flex justify-end gap-3 px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-xl">
+                <button
+                  type="button"
+                  onClick={() => setShowAddForm(false)}
+                  className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                  disabled={saving}
                 >
-                  <option value="">Select category</option>
-                  <option value="annual_filing">Annual Filing</option>
-                  <option value="tax_return">Tax Return</option>
-                  <option value="regulatory">Regulatory</option>
-                  <option value="contract_renewal">Contract Renewal</option>
-                  <option value="insurance">Insurance</option>
-                  <option value="general">General</option>
-                </select>
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors disabled:opacity-50"
+                >
+                  {saving ? 'Adding...' : 'Add Deadline'}
+                </button>
               </div>
-            </div>
-            <div>
-              <label htmlFor="dueDate" className="block text-sm font-medium text-gray-700">Due Date *</label>
-              <input
-                type="date"
-                id="dueDate"
-                value={newDeadline.dueDate}
-                onChange={(e) => setNewDeadline({ ...newDeadline, dueDate: e.target.value })}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                required
-              />
-            </div>
-            <div>
-              <label htmlFor="description" className="block text-sm font-medium text-gray-700">Description</label>
-              <textarea
-                id="description"
-                value={newDeadline.description}
-                onChange={(e) => setNewDeadline({ ...newDeadline, description: e.target.value })}
-                rows={3}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Add any additional details about this deadline..."
-              />
-            </div>
-            <div className="flex justify-end">
-              <button
-                type="submit"
-                disabled={saving}
-                className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
-              >
-                {saving ? 'Adding...' : 'Add Deadline'}
-              </button>
-            </div>
-          </form>
+            </form>
+          </div>
         </div>
       )}
 

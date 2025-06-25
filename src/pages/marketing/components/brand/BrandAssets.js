@@ -665,91 +665,96 @@ const BrandAssets = () => {
 
       {/* Edit Brand Information Modal */}
       {showEditModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-          <div className="bg-white rounded-md border border-gray-300 w-full max-w-md mx-auto p-6">
-            <h3 className="text-base font-semibold text-gray-900 mb-4">Edit Logo and Tagline</h3>
-            <div className="space-y-4">
-              {/* Logo upload */}
-              <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1">Logo</label>
-                <div className="flex items-center gap-4">
-                  {editDraft.logo_url ? (
-                    <img src={editDraft.logo_url} alt="Logo Preview" className="w-16 h-16 object-contain bg-gray-100 border border-gray-200 rounded-md" />
-                  ) : (
-                    <div className="w-16 h-16 bg-gray-100 border border-gray-200 rounded-md flex items-center justify-center text-gray-300">
-                      <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black bg-opacity-50" onClick={() => setShowEditModal(false)} />
+          <div className="relative max-w-xl w-full bg-white rounded-xl shadow-2xl flex flex-col">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gray-50 rounded-t-xl">
+              <h3 className="text-lg font-medium text-gray-900">Edit Logo and Tagline</h3>
+              <button onClick={() => setShowEditModal(false)} className="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+            </div>
+            <form onSubmit={async e => { e.preventDefault(); const updatedBrandInfo = { ...brandInfo, ...editDraft }; setBrandInfo(updatedBrandInfo); setShowEditModal(false); try { setSaving(true); await upsertBrandInformation(updatedBrandInfo, currentOrganization.organization_id); alert('Brand information saved successfully!'); } catch (error) { console.error('Error saving brand information:', error); alert('Failed to save brand information. Please try again.'); } finally { setSaving(false); } }} className="flex-1 flex flex-col justify-center">
+              <div className="flex-1 px-6 py-8 flex flex-col justify-center space-y-4">
+                {/* Logo upload */}
+                <div className="mb-6">
+                  <div className="mb-2">
+                    <span className="block text-sm font-medium text-gray-700">Logo</span>
+                    <span className="block text-xs text-gray-500">Upload your company logo for branding.</span>
+                  </div>
+                  <div className="border border-gray-200 bg-gray-100 rounded-lg px-4 py-4 flex items-center space-x-6 w-full max-w-md">
+                    {/* Logo or Placeholder */}
+                    <div className="w-28 h-28 flex items-center justify-center bg-white rounded-lg overflow-hidden border border-gray-200">
+                      {editDraft.logo_url ? (
+                        <img src={editDraft.logo_url} alt="Logo Preview" className="object-contain w-full h-full" />
+                      ) : (
+                        <svg className="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4" stroke="currentColor" strokeWidth="2" fill="none"/><path d="M8 12h8M12 8v8" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
+                      )}
                     </div>
-                  )}
+                    {/* Replace Button Only */}
+                    <div className="flex flex-col items-start space-y-2">
+                      <button
+                        type="button"
+                        onClick={() => document.getElementById('brand-logo-file-input').click()}
+                        className="px-3 py-1 text-xs font-medium bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
+                      >
+                        Replace image
+                      </button>
+                      <input
+                        id="brand-logo-file-input"
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={async (e) => {
+                          const file = e.target.files[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onload = (ev) => setEditDraft(d => ({ ...d, logo_url: ev.target.result }));
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+                {/* Tagline */}
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 mb-1">Tagline</label>
                   <input
-                    type="file"
-                    accept="image/*"
-                    className="text-xs"
-                    onChange={async (e) => {
-                      const file = e.target.files[0];
-                      if (file) {
-                        // Optionally upload immediately or just preview
-                        // For now, just preview
-                        const reader = new FileReader();
-                        reader.onload = (ev) => setEditDraft(d => ({ ...d, logo_url: ev.target.result }));
-                        reader.readAsDataURL(file);
-                      }
-                    }}
+                    type="text"
+                    value={editDraft.tagline}
+                    onChange={e => setEditDraft(d => ({ ...d, tagline: e.target.value }))}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm"
+                    placeholder="Your brand tagline"
+                  />
+                </div>
+                {/* Blurb */}
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 mb-1">Brand Description</label>
+                  <textarea
+                    value={editDraft.brand_blurb}
+                    onChange={e => setEditDraft(d => ({ ...d, brand_blurb: e.target.value }))}
+                    rows={2}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm"
+                    placeholder="Brief description of your brand"
                   />
                 </div>
               </div>
-              {/* Tagline */}
-              <div>
-                <label className="block text-xs font-semibold text-gray-800 mb-1">Tagline</label>
-                <input
-                  type="text"
-                  value={editDraft.tagline}
-                  onChange={e => setEditDraft(d => ({ ...d, tagline: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm text-gray-600"
-                  placeholder="Your brand tagline"
-                />
+              <div className="flex justify-end gap-3 px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-xl">
+                <button
+                  type="button"
+                  onClick={() => setShowEditModal(false)}
+                  className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors disabled:opacity-50"
+                  disabled={saving}
+                >
+                  Save
+                </button>
               </div>
-              {/* Blurb */}
-              <div>
-                <label className="block text-xs font-semibold text-gray-800 mb-1">Brand Description</label>
-                <textarea
-                  value={editDraft.brand_blurb}
-                  onChange={e => setEditDraft(d => ({ ...d, brand_blurb: e.target.value }))}
-                  rows={2}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm text-gray-600"
-                  placeholder="Brief description of your brand"
-                />
-              </div>
-            </div>
-            <div className="flex justify-end gap-2 mt-6">
-              <button
-                onClick={() => setShowEditModal(false)}
-                className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={async () => {
-                  const updatedBrandInfo = { ...brandInfo, ...editDraft };
-                  setBrandInfo(updatedBrandInfo);
-                  setShowEditModal(false);
-                  try {
-                    setSaving(true);
-                    await upsertBrandInformation(updatedBrandInfo, currentOrganization.organization_id);
-                    alert('Brand information saved successfully!');
-                  } catch (error) {
-                    console.error('Error saving brand information:', error);
-                    alert('Failed to save brand information. Please try again.');
-                  } finally {
-                    setSaving(false);
-                  }
-                }}
-                className="px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
-              >
-                Save
-              </button>
-            </div>
+            </form>
           </div>
         </div>
       )}

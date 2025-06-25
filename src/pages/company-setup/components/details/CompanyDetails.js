@@ -178,7 +178,7 @@ const CompanyDetails = () => {
         <div className="w-full flex flex-col md:flex-row gap-8 mb-4">
           {/* Logo upload, 1/3 width */}
           <div className="w-full md:w-1/3 flex flex-col items-center justify-center bg-white rounded-xl shadow p-6 min-h-[220px] h-full">
-            <div className="mb-4 w-32 h-32 flex items-center justify-center bg-gray-100 rounded-full overflow-hidden">
+            <div className="mb-4 w-32 h-32 flex items-center justify-center rounded-lg overflow-hidden">
               {logoUrl ? (
                 <img src={logoUrl} alt="Company Logo" className="object-contain w-full h-full" />
               ) : (
@@ -220,14 +220,14 @@ const CompanyDetails = () => {
                     {isEditingBasic ? (
                       <>
                         <CheckIcon className="h-4 w-4 mr-1" /> Save
-                      </>
-                    ) : (
-                      <>
+                </>
+              ) : (
+                <>
                         <PencilIcon className="h-4 w-4 mr-1" /> Edit
-                      </>
-                    )}
-                  </button>
-                </div>
+                </>
+              )}
+            </button>
+          </div>
               </div>
               <div className="px-6 pb-6 pt-0 space-y-4">
                 {/* Field: Company Name */}
@@ -238,7 +238,7 @@ const CompanyDetails = () => {
                   ) : (
                     <div className="flex-1 text-gray-900 text-sm">{companyInfo.name}</div>
                   )}
-                </div>
+              </div>
                 {/* Field: Company Number */}
                 <div className="flex items-center gap-4">
                   <label className="block w-40 text-xs font-bold text-gray-500">Company Number</label>
@@ -247,7 +247,7 @@ const CompanyDetails = () => {
                   ) : (
                     <div className="flex-1 text-gray-900 text-sm">{companyInfo.companyNumber}</div>
                   )}
-                </div>
+              </div>
                 {/* Field: Incorporation Date */}
                 <div className="flex items-center gap-4">
                   <label className="block w-40 text-xs font-medium text-gray-500">Incorporation Date</label>
@@ -256,11 +256,11 @@ const CompanyDetails = () => {
                   ) : (
                     <div className="flex-1 text-gray-900 text-sm">{companyInfo.incorporationDate}</div>
                   )}
-                </div>
               </div>
-            </div>
-          </div>
-        </div>
+              </div>
+              </div>
+              </div>
+              </div>
         {/* Contact Section */}
         <div className="w-full">
           <div className="bg-white rounded-xl shadow p-0 space-y-0 w-full">
@@ -369,7 +369,7 @@ const CompanyDetails = () => {
                   )}
                 </button>
               </div>
-            </div>
+              </div>
             <div className="px-6 pb-6 pt-0 space-y-4">
               {/* Field: Bank Provider */}
               <div className="flex items-center gap-4">
